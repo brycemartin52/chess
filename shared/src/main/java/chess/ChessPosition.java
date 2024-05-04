@@ -8,22 +8,23 @@ package chess;
  */
 public class ChessPosition {
 
+    private int r;
+    private int c;
+
     public ChessPosition(int row, int col) {
+        this.r = row;
+        this.c = col;
     }
 
     /**
      * @return which row this position is in
      * 1 codes for the bottom row
      */
-    public int getRow() {
-        throw new RuntimeException("Not implemented");
-    }
+    public int getRow() {return r;}
 
     /**
      * @return which column this position is in
      * 1 codes for the left row
      */
-    public int getColumn() {
-        throw new RuntimeException("Not implemented");
-    }
+    public int getColumn() {return c;}
 }
