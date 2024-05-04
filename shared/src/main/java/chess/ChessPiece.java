@@ -53,6 +53,9 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
+//        if(type == PieceType.PAWN){
+//            // do something here;
+//        }
         throw new RuntimeException("Not implemented");
     }
-}
+}3
