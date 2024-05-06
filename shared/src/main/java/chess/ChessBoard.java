@@ -44,9 +44,29 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
-        // for(i = 0; i < 7; i++){
-        //     addPiece(ChessPosition(1, i), ChessPiece())
-        // }
+//         for(int i = 0; i < 7; i++){
+//             addPiece(ChessPosition(1, i), ChessPiece(WHITE, PAWN));
+//         }
+//         addPiece(ChessPosition(0, 0), ChessPiece(WHITE, ROOK));
+//         addPiece(ChessPosition(0, 7), ChessPiece(WHITE, ROOK));
+//         addPiece(ChessPosition(0, 1), ChessPiece(WHITE, KNIGHT));
+//         addPiece(ChessPosition(0, 6), ChessPiece(WHITE, KNIGHT));
+//         addPiece(ChessPosition(0, 2), ChessPiece(WHITE, BISHOP));
+//         addPiece(ChessPosition(0, 5), ChessPiece(WHITE, BISHOP));
+//         addPiece(ChessPosition(0, 3), ChessPiece(WHITE, QUEEN));
+//         addPiece(ChessPosition(0, 4), ChessPiece(WHITE, KING));
+//
+//         for(int i = 0; i < 7; i++){
+//             addPiece(ChessPosition(6, i), ChessPiece(BLACK, PAWN));
+//         }
+//         addPiece(ChessPosition(7, 0), ChessPiece(BLACK, ROOK));
+//         addPiece(ChessPosition(7, 7), ChessPiece(BLACK, ROOK));
+//         addPiece(ChessPosition(7, 1), ChessPiece(BLACK, KNIGHT));
+//         addPiece(ChessPosition(7, 6), ChessPiece(BLACK, KNIGHT));
+//         addPiece(ChessPosition(7, 2), ChessPiece(BLACK, BISHOP));
+//         addPiece(ChessPosition(7, 5), ChessPiece(BLACK, BISHOP));
+//         addPiece(ChessPosition(7, 3), ChessPiece(BLACK, QUEEN));
+//         addPiece(ChessPosition(7, 4), ChessPiece(BLACK, KING));
         throw new RuntimeException("Not implemented");
     }
 }

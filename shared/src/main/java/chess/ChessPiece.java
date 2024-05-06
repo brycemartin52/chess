@@ -58,4 +58,4 @@ public class ChessPiece {
 //        }
         throw new RuntimeException("Not implemented");
     }
-}3
+}

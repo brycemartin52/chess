@@ -8,8 +8,13 @@ package chess;
  */
 public class ChessMove {
 
+    ChessPiece piece;
+
     public ChessMove(ChessPosition startPosition, ChessPosition endPosition,
                      ChessPiece.PieceType promotionPiece) {
+//        ChessPiece piece = ChessBoard.getPiece(startPosition);
+//        ChessBoard.addPiece(endPosition, piece);
+//        Make the startPosition have *null in its place
     }
 
     /**
