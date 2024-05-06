@@ -12,7 +12,7 @@ public class ChessBoard {
 
     public ChessBoard() {
        board  = new ChessPiece[8][8];
-        resetBoard();
+       resetBoard();
     }
 
     /**
@@ -45,29 +45,30 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
+
 //         for(int i = 0; i < 7; i++){
-//             addPiece(ChessPosition(1, i), ChessPiece(WHITE, PAWN));
+//             addPiece(new ChessPosition(1, i), new ChessPiece(WHITE, PAWN));
 //         }
-//         addPiece(ChessPosition(0, 0), ChessPiece(WHITE, ROOK));
-//         addPiece(ChessPosition(0, 7), ChessPiece(WHITE, ROOK));
-//         addPiece(ChessPosition(0, 1), ChessPiece(WHITE, KNIGHT));
-//         addPiece(ChessPosition(0, 6), ChessPiece(WHITE, KNIGHT));
-//         addPiece(ChessPosition(0, 2), ChessPiece(WHITE, BISHOP));
-//         addPiece(ChessPosition(0, 5), ChessPiece(WHITE, BISHOP));
-//         addPiece(ChessPosition(0, 3), ChessPiece(WHITE, QUEEN));
-//         addPiece(ChessPosition(0, 4), ChessPiece(WHITE, KING));
+//         addPiece(new ChessPosition(0, 0), new ChessPiece(WHITE, ROOK));
+//         addPiece(new ChessPosition(0, 7), new ChessPiece(WHITE, ROOK));
+//         addPiece(new ChessPosition(0, 1), new ChessPiece(WHITE, KNIGHT));
+//         addPiece(new ChessPosition(0, 6), new ChessPiece(WHITE, KNIGHT));
+//         addPiece(new ChessPosition(0, 2), new ChessPiece(WHITE, BISHOP));
+//         addPiece(new ChessPosition(0, 5), new ChessPiece(WHITE, BISHOP));
+//         addPiece(new ChessPosition(0, 3), new ChessPiece(WHITE, QUEEN));
+//         addPiece(new ChessPosition(0, 4), new ChessPiece(WHITE, KING));
 //
 //         for(int i = 0; i < 7; i++){
-//             addPiece(ChessPosition(6, i), ChessPiece(BLACK, PAWN));
+//             addPiece(new ChessPosition(6, i), new ChessPiece(BLACK, PAWN));
 //         }
-//         addPiece(ChessPosition(7, 0), ChessPiece(BLACK, ROOK));
-//         addPiece(ChessPosition(7, 7), ChessPiece(BLACK, ROOK));
-//         addPiece(ChessPosition(7, 1), ChessPiece(BLACK, KNIGHT));
-//         addPiece(ChessPosition(7, 6), ChessPiece(BLACK, KNIGHT));
-//         addPiece(ChessPosition(7, 2), ChessPiece(BLACK, BISHOP));
-//         addPiece(ChessPosition(7, 5), ChessPiece(BLACK, BISHOP));
-//         addPiece(ChessPosition(7, 3), ChessPiece(BLACK, QUEEN));
-//         addPiece(ChessPosition(7, 4), ChessPiece(BLACK, KING));
+//         addPiece(new ChessPosition(7, 0), new ChessPiece(BLACK, ROOK));
+//         addPiece(new ChessPosition(7, 7), new ChessPiece(BLACK, ROOK));
+//         addPiece(new ChessPosition(7, 1), new ChessPiece(BLACK, KNIGHT));
+//         addPiece(new ChessPosition(7, 6), new ChessPiece(BLACK, KNIGHT));
+//         addPiece(new ChessPosition(7, 2), new ChessPiece(BLACK, BISHOP));
+//         addPiece(new ChessPosition(7, 5), new ChessPiece(BLACK, BISHOP));
+//         addPiece(new ChessPosition(7, 3), new ChessPiece(BLACK, QUEEN));
+//         addPiece(new ChessPosition(7, 4), new ChessPiece(BLACK, KING));
         throw new RuntimeException("Not implemented");
     }
 }
