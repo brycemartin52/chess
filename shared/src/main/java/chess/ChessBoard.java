@@ -1,5 +1,8 @@
 package chess;
 
+import java.util.Arrays;
+import java.util.Objects;
+
 /**
  * A chessboard that can hold and rearrange chess pieces.
  * <p>
@@ -45,30 +48,42 @@ public class ChessBoard {
      * (How the game of chess normally starts)
      */
     public void resetBoard() {
+         for(int i = 0; i <= 7; i++){
+             addPiece(new ChessPosition(1, i), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN));
+         }
+         addPiece(new ChessPosition(0, 0), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK));
+         addPiece(new ChessPosition(0, 7), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.ROOK));
+         addPiece(new ChessPosition(0, 1), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT));
+         addPiece(new ChessPosition(0, 6), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KNIGHT));
+         addPiece(new ChessPosition(0, 2), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.BISHOP));
+         addPiece(new ChessPosition(0, 5), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.BISHOP));
+         addPiece(new ChessPosition(0, 3), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.QUEEN));
+         addPiece(new ChessPosition(0, 4), new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.KING));
 
-//         for(int i = 0; i < 7; i++){
-//             addPiece(new ChessPosition(1, i), new ChessPiece(WHITE, PAWN));
-//         }
-//         addPiece(new ChessPosition(0, 0), new ChessPiece(WHITE, ROOK));
-//         addPiece(new ChessPosition(0, 7), new ChessPiece(WHITE, ROOK));
-//         addPiece(new ChessPosition(0, 1), new ChessPiece(WHITE, KNIGHT));
-//         addPiece(new ChessPosition(0, 6), new ChessPiece(WHITE, KNIGHT));
-//         addPiece(new ChessPosition(0, 2), new ChessPiece(WHITE, BISHOP));
-//         addPiece(new ChessPosition(0, 5), new ChessPiece(WHITE, BISHOP));
-//         addPiece(new ChessPosition(0, 3), new ChessPiece(WHITE, QUEEN));
-//         addPiece(new ChessPosition(0, 4), new ChessPiece(WHITE, KING));
-//
-//         for(int i = 0; i < 7; i++){
-//             addPiece(new ChessPosition(6, i), new ChessPiece(BLACK, PAWN));
-//         }
-//         addPiece(new ChessPosition(7, 0), new ChessPiece(BLACK, ROOK));
-//         addPiece(new ChessPosition(7, 7), new ChessPiece(BLACK, ROOK));
-//         addPiece(new ChessPosition(7, 1), new ChessPiece(BLACK, KNIGHT));
-//         addPiece(new ChessPosition(7, 6), new ChessPiece(BLACK, KNIGHT));
-//         addPiece(new ChessPosition(7, 2), new ChessPiece(BLACK, BISHOP));
-//         addPiece(new ChessPosition(7, 5), new ChessPiece(BLACK, BISHOP));
-//         addPiece(new ChessPosition(7, 3), new ChessPiece(BLACK, QUEEN));
-//         addPiece(new ChessPosition(7, 4), new ChessPiece(BLACK, KING));
-        throw new RuntimeException("Not implemented");
+         for(int i = 0; i <= 7; i++){
+             addPiece(new ChessPosition(6, i), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.PAWN));
+         }
+         addPiece(new ChessPosition(7, 0), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK));
+         addPiece(new ChessPosition(7, 7), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.ROOK));
+         addPiece(new ChessPosition(7, 1), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KNIGHT));
+         addPiece(new ChessPosition(7, 6), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KNIGHT));
+         addPiece(new ChessPosition(7, 2), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.BISHOP));
+         addPiece(new ChessPosition(7, 5), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.BISHOP));
+         addPiece(new ChessPosition(7, 3), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.QUEEN));
+         addPiece(new ChessPosition(7, 4), new ChessPiece(ChessGame.TeamColor.BLACK, ChessPiece.PieceType.KING));
+//        throw new RuntimeException("Not implemented");
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ChessBoard that = (ChessBoard) o;
+        return Objects.deepEquals(board, that.board);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.deepHashCode(board);
     }
 }
