@@ -55,19 +55,19 @@ public class ChessPiece {
             return AllMoves.pawnMoves(board, myPosition);
         }
         if(type == PieceType.KNIGHT){
-            return knightMoves;
+            return AllMoves.knightMoves(board, myPosition);
         }
         if(type == PieceType.BISHOP){
-            return bishopMoves;
+            return AllMoves.bishopMoves(board, myPosition);
         }
         if(type == PieceType.ROOK){
-            return rookMoves;
+            return AllMoves.rookMoves(board, myPosition);
         }
         if(type == PieceType.QUEEN){
-            return queenMoves;
+            return AllMoves.queenMoves(board, myPosition);
         }
         if(type == PieceType.KING){
-            return kingMoves;
+            return AllMoves.kingMoves(board, myPosition);
         }
         throw new RuntimeException("Not implemented");
     }
