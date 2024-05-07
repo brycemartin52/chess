@@ -18,6 +18,10 @@ public class ChessPosition {
         this.c = col;
     }
 
+    public boolean inBounds(){
+        return 1 <= r && r <= 8 && 1 <= c && c <= 8;
+    }
+
     /**
      * @return which row this position is in
      * 1 codes for the bottom row
