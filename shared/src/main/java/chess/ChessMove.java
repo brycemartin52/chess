@@ -57,4 +57,12 @@ public class ChessMove {
     public int hashCode() {
         return Objects.hash(startPosition, endPosition, piece);
     }
+
+    @Override
+    public String toString() {
+        return "CM{" +
+                ", end=" + endPosition +
+                ", piece=" + piece +
+                '}';
+    }
 }

@@ -18,10 +18,6 @@ public class ChessPosition {
         this.c = col;
     }
 
-    public boolean inBounds(){
-        return 1 <= r && r <= 8 && 1 <= c && c <= 8;
-    }
-
     /**
      * @return which row this position is in
      * 1 codes for the bottom row
@@ -49,9 +45,9 @@ public class ChessPosition {
 
     @Override
     public String toString() {
-        return "ChessPosition{" +
-                "row=" + r +
-                ", column=" + c +
+        return "Pos{" +
+                "r=" + r +
+                ", c=" + c +
                 '}';
     }
 }

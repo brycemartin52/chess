@@ -12,7 +12,6 @@ import java.util.ArrayList;
  */
 public class ChessPiece {
 
-
     private ChessGame.TeamColor color;
     private ChessPiece.PieceType type;
 
@@ -51,26 +50,16 @@ public class ChessPiece {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        if(type == PieceType.PAWN){
-            return AllMoves.pawnMoves(board, myPosition);
+        return switch(type){
+            case PAWN -> AllMoves.pawnMoves(board, myPosition);
+            case KNIGHT -> AllMoves.knightMoves(board, myPosition);
+            case BISHOP -> AllMoves.bishopMoves(board, myPosition);
+            case ROOK -> AllMoves.rookMoves(board, myPosition);
+            case QUEEN -> AllMoves.queenMoves(board, myPosition);
+            case KING -> AllMoves.kingMoves(board, myPosition);
+            };
         }
-        if(type == PieceType.KNIGHT){
-            return AllMoves.knightMoves(board, myPosition);
-        }
-        if(type == PieceType.BISHOP){
-            return AllMoves.bishopMoves(board, myPosition);
-        }
-        if(type == PieceType.ROOK){
-            return AllMoves.rookMoves(board, myPosition);
-        }
-        if(type == PieceType.QUEEN){
-            return AllMoves.queenMoves(board, myPosition);
-        }
-        if(type == PieceType.KING){
-            return AllMoves.kingMoves(board, myPosition);
-        }
-        throw new RuntimeException("Not implemented");
-    }
+
 
     @Override
     public boolean equals(Object o) {
