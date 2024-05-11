@@ -10,44 +10,48 @@ import java.util.Objects;
  */
 public class ChessPosition {
 
-    private int r;
-    private int c;
+    int row;
+    int col;
 
     public ChessPosition(int row, int col) {
-        this.r = row;
-        this.c = col;
+        this.row = row;
+        this.col = col;
     }
 
     /**
      * @return which row this position is in
      * 1 codes for the bottom row
      */
-    public int getRow() {return r;}
+    public int getRow() {
+        return row;
+    }
 
     /**
      * @return which column this position is in
      * 1 codes for the left row
      */
-    public int getColumn() {return c;}
+    public int getColumn() {
+        return col;
+    }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ChessPosition that = (ChessPosition) o;
-        return r == that.r && c == that.c;
+        return row == that.row && col == that.col;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(r, c);
+        return Objects.hash(row, col);
     }
 
     @Override
     public String toString() {
         return "Pos{" +
-                "r=" + r +
-                ", c=" + c +
+                "r=" + row +
+                ", c=" + col +
                 '}';
     }
 }
