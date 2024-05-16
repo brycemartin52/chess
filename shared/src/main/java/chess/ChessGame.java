@@ -38,6 +38,11 @@ public class ChessGame {
      */
     public void setTeamTurn(TeamColor team) {teamTurn = team;}
 
+    public TeamColor opposingTeam(TeamColor team) {if(team == TeamColor.WHITE){
+        return TeamColor.BLACK;
+    }
+    return TeamColor.WHITE;}
+
     /**
      * Enum identifying the 2 possible teams in a chess game
      */
@@ -136,8 +141,10 @@ public class ChessGame {
         if(piece.getPieceType() == ChessPiece.PieceType.KING){
             findKings();
         }
+        setTeamTurn(opposingTeam(piece.getTeamColor()));
     }
 
+    ///Comment
 
     /**
      * Determines if the given team is in check
