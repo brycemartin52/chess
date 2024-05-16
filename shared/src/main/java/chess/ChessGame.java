@@ -41,7 +41,7 @@ public class ChessGame {
     public TeamColor opposingTeam(TeamColor team) {if(team == TeamColor.WHITE){
         return TeamColor.BLACK;
     }
-    return TeamColor.WHITE;}
+        return TeamColor.WHITE;}
 
     /**
      * Enum identifying the 2 possible teams in a chess game
@@ -98,14 +98,14 @@ public class ChessGame {
         Collection<ChessMove> valMoves = new ArrayList<>();
 
 //        try{
-            for(ChessMove move : potentialMoves) {
-                board = (ChessBoard) tmpBoard.copy();
-                doMove(move);
-                findKings();
-                if (!isInCheck(team)) {
-                    valMoves.add(move);
-                }
+        for(ChessMove move : potentialMoves) {
+            board = (ChessBoard) tmpBoard.copy();
+            doMove(move);
+            findKings();
+            if (!isInCheck(team)) {
+                valMoves.add(move);
             }
+        }
 //        }
 //        catch(CloneNotSupportedException e){
 //            throw new RuntimeException(e);
