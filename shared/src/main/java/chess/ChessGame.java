@@ -52,12 +52,12 @@ public class ChessGame {
     }
 
     public void doMove(ChessMove move){
-        ChessPosition start_pos = move.getStartPosition();
-        ChessPiece piece = board.getPiece(start_pos);
+        ChessPosition startPos = move.getStartPosition();
+        ChessPiece piece = board.getPiece(startPos);
         if(move.getPromotionPiece() != null){
             piece.type = move.getPromotionPiece();
         }
-        board.addPiece(start_pos, null);
+        board.addPiece(startPos, null);
         board.addPiece(move.getEndPosition(), piece);
     }
 
