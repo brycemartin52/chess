@@ -17,7 +17,6 @@ public class ChessBoard implements Cloneable{
     public ChessBoard() {
         board = new ChessPiece[8][8];
     }
-
     /**
      * Adds a chess piece to the chessboard
      *
@@ -89,13 +88,14 @@ public class ChessBoard implements Cloneable{
     @Override
     public String toString() {
         return "ChessBoard{" +
-                "board=" + Arrays.toString(board) +
+                "board=" + Arrays.deepToString(board) +
                 '}';
     }
 
     @Override
     public Object clone() throws CloneNotSupportedException {
         ChessBoard cloneBoard = (ChessBoard) super.clone();
+        cloneBoard.board = new ChessPiece[8][8];
 
         for(int i = 1; i <= 8; i++){
             for(int j = 1; j <= 8; j++){
@@ -112,7 +112,7 @@ public class ChessBoard implements Cloneable{
         return cloneBoard;
     }
 
-    public Object copy(){
+    public ChessBoard copy(){
         ChessBoard copyBoard = new ChessBoard();
 
         for(int i = 1; i <= 8; i++){

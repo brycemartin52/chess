@@ -97,19 +97,20 @@ public class ChessGame {
         Collection<ChessMove> potentialMoves = piece.pieceMoves(board, startPosition);
         Collection<ChessMove> valMoves = new ArrayList<>();
 
-//        try{
+        try{
         for(ChessMove move : potentialMoves) {
-            board = (ChessBoard) tmpBoard.copy();
+//            board = tmpBoard.copy();
+            board = (ChessBoard) tmpBoard.clone();
             doMove(move);
             findKings();
             if (!isInCheck(team)) {
                 valMoves.add(move);
             }
         }
-//        }
-//        catch(CloneNotSupportedException e){
-//            throw new RuntimeException(e);
-//        }
+        }
+        catch(CloneNotSupportedException e){
+            throw new RuntimeException(e);
+        }
 
         board = tmpBoard;
         return valMoves;
