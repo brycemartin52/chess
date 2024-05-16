@@ -77,6 +77,33 @@ public class AllMoves {
         }
     }
 
+    public static Collection<ChessMove> collectDiagonals(ChessBoard board, ChessPosition ogPos, Collection<ChessMove> moves, int rowAdd, int colAdd){
+        int ogR = ogPos.getRow();
+        int ogC = ogPos.getColumn();
+
+        int row = ogR;
+        int col = ogC;
+        while(row < 8 && col < 8){
+            row += rowAdd;
+            col += colAdd;
+            ChessPosition otherPos = new ChessPosition(row, col);
+            ChessPiece otherPiece = board.getPiece(otherPos);
+            if(otherPiece == null){
+                moves.add(new ChessMove(ogPos, otherPos));
+            }
+            else{
+                if(otherPiece.getTeamColor() != board.getPiece(ogPos).getTeamColor()){
+                    moves.add(new ChessMove(ogPos, otherPos));
+                }
+                break;
+            }
+        }
+        row = ogR;
+        col = ogC;
+
+        return moves;
+    }
+
     public static void diagonal(ChessBoard board, ChessPosition ogPos, Collection<ChessMove> moves){
         ChessPiece piece = board.getPiece(ogPos);
         ChessGame.TeamColor team = piece.getTeamColor();
@@ -106,14 +133,14 @@ public class AllMoves {
         while(row > 1 && col < 8){
             row--;
             col++;
-            ChessPosition other_pos = new ChessPosition(row, col);
-            ChessPiece other_piece = board.getPiece(other_pos);
-            if(other_piece == null){
-                moves.add(new ChessMove(ogPos, other_pos));
+            ChessPosition otherPos = new ChessPosition(row, col);
+            ChessPiece otherPiece = board.getPiece(otherPos);
+            if(otherPiece == null){
+                moves.add(new ChessMove(ogPos, otherPos));
             }
             else{
-                if(other_piece.getTeamColor() != team){
-                    moves.add(new ChessMove(ogPos, other_pos));
+                if(otherPiece.getTeamColor() != team){
+                    moves.add(new ChessMove(ogPos, otherPos));
                 }
                 break;
             }
@@ -231,8 +258,8 @@ public class AllMoves {
     public static Collection<ChessMove> pawnMoves(ChessBoard board, ChessPosition og_pos){
         Collection<ChessMove> moves = new ArrayList<>();
         ChessGame.TeamColor team = board.getPiece(og_pos).getTeamColor();
-        int og_r = og_pos.getRow();
-        int og_c = og_pos.getColumn();
+        int row = og_pos.getRow();
+        int col = og_pos.getColumn();
 
         int start = switch(team){
             case WHITE -> 2;
@@ -242,9 +269,6 @@ public class AllMoves {
             case WHITE -> 1;
             case BLACK -> -1;
         };
-
-        int row = og_r;
-        int col = og_c;
 
         //Forward logic
         ChessPosition other_pos = new ChessPosition(row + forward, col);
