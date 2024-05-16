@@ -101,10 +101,32 @@ public class ChessBoard implements Cloneable{
             for(int j = 1; j <= 8; j++){
                 ChessPosition pos = new ChessPosition(i, j);
                 ChessPiece piece = getPiece(pos);
-                cloneBoard.addPiece(pos, piece);
+                if(piece != null){
+                    ChessPiece.PieceType newPiece = piece.getPieceType();
+                    ChessGame.TeamColor team = piece.getTeamColor();
+                    cloneBoard.addPiece(pos, new ChessPiece(team, newPiece));
+                }
             }
         }
 
         return cloneBoard;
+    }
+
+    public Object copy(){
+        ChessBoard copyBoard = new ChessBoard();
+
+        for(int i = 1; i <= 8; i++){
+            for(int j = 1; j <= 8; j++){
+                ChessPosition pos = new ChessPosition(i, j);
+                ChessPiece piece = getPiece(pos);
+                if(piece != null){
+                    ChessPiece.PieceType newPiece = piece.getPieceType();
+                    ChessGame.TeamColor team = piece.getTeamColor();
+                    copyBoard.addPiece(pos, new ChessPiece(team, newPiece));
+                }
+            }
+        }
+
+        return copyBoard;
     }
 }

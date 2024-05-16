@@ -21,7 +21,7 @@ public class ChessGame {
         this.board = new ChessBoard();
         board.resetBoard();
         teamTurn = TeamColor.WHITE;
-        findKings();
+//        findKings();
     }
 
     /**
@@ -49,6 +49,9 @@ public class ChessGame {
     public void doMove(ChessMove move){
         ChessPosition start_pos = move.getStartPosition();
         ChessPiece piece = board.getPiece(start_pos);
+        if(move.getPromotionPiece() != null){
+            piece.type = move.getPromotionPiece();
+        }
         board.addPiece(start_pos, null);
         board.addPiece(move.getEndPosition(), piece);
     }
@@ -89,19 +92,21 @@ public class ChessGame {
         Collection<ChessMove> potentialMoves = piece.pieceMoves(board, startPosition);
         Collection<ChessMove> valMoves = new ArrayList<>();
 
-        for(ChessMove move : potentialMoves){
-            try{
-                board = (ChessBoard) tmpBoard.clone();
+//        try{
+            for(ChessMove move : potentialMoves) {
+                board = (ChessBoard) tmpBoard.copy();
                 doMove(move);
-                if(!isInCheck(team)){
+                findKings();
+                if (!isInCheck(team)) {
                     valMoves.add(move);
                 }
             }
-            catch(CloneNotSupportedException e){
-                throw new RuntimeException(e);
-            }
+//        }
+//        catch(CloneNotSupportedException e){
+//            throw new RuntimeException(e);
+//        }
 
-        }
+
         board = tmpBoard;
         return valMoves;
     }
@@ -113,14 +118,21 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
+        ChessPiece piece = board.getPiece(move.getStartPosition());
+        if (piece == null) {
+            throw new InvalidMoveException("Position contains no piece");
+        }
+
+        if (piece.getTeamColor() != getTeamTurn()) {
+            throw new InvalidMoveException("Incorrect team");
+        }
+
         Collection<ChessMove> posMoves = validMoves(move.getStartPosition());
 
         if (!posMoves.contains(move)) {
             throw new InvalidMoveException("Position is out of range");
         }
-
         doMove(move);
-        ChessPiece piece = board.getPiece(move.getStartPosition());
         if(piece.getPieceType() == ChessPiece.PieceType.KING){
             findKings();
         }
