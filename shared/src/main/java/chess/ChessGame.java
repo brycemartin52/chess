@@ -111,7 +111,6 @@ public class ChessGame {
 //            throw new RuntimeException(e);
 //        }
 
-
         board = tmpBoard;
         return valMoves;
     }
@@ -144,7 +143,6 @@ public class ChessGame {
         setTeamTurn(opposingTeam(piece.getTeamColor()));
     }
 
-    ///Comment
 
     /**
      * Determines if the given team is in check
@@ -176,6 +174,23 @@ public class ChessGame {
         return false;
     }
 
+    public boolean anyPossibleMoves(TeamColor team){
+
+        for(int i = 1; i <= 8; i++){
+            for(int j = 1; j <= 8; j++){
+                ChessPosition pos = new ChessPosition(i, j);
+                ChessPiece piece = board.getPiece(pos);
+                if(piece != null && piece.getTeamColor() == team){
+                    Collection<ChessMove> moves = validMoves(pos);
+                    if(!moves.isEmpty()){
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
     /**
      * Determines if the given team is in checkmate
      *
@@ -187,13 +202,7 @@ public class ChessGame {
             return false;
         }
         else{
-            // Copy the board
-            // grab all the moves
-            // test each individual move
-            // for each move, if not still in check, then add to the collection
-            // if the collection is empty, return true
-            //
-            return true;
+            return !anyPossibleMoves(teamColor);
         }
     }
 
@@ -205,7 +214,12 @@ public class ChessGame {
      * @return True if the specified team is in stalemate, otherwise false
      */
     public boolean isInStalemate(TeamColor teamColor) {
-        throw new RuntimeException("Not implemented");
+        if(isInCheck(teamColor)){
+            return false;
+        }
+        else{
+            return !anyPossibleMoves(teamColor);
+        }
     }
 
     /**
