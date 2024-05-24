@@ -1,59 +1,41 @@
 package dataaccess;
 
-
-import model.AuthData;
 import model.GameData;
 
-import java.util.ArrayList;
-import java.util.Objects;
+import java.util.HashMap;
 
 public class GameDAO implements GameDAOInterface{
 
-    ArrayList<GameData> allGameData;
-    ArrayList<Integer> allGameIDs;
+    HashMap<Integer, GameData> gameData;
+    int numGames;
 
-    public GameDAO(){
-    }
+    public GameDAO(){}
 
     @Override
     public void createGame(GameData dat) {
-
+        numGames++;
+        int id = dat.gameID();
+        gameData.put(id, dat);
     }
 
     @Override
-    public GameData getGame(int gameID) throws DataAccessException{
-        if(allGameIDs.contains(gameID)){
-            for(GameData dat : allGameData){
-                if(Objects.equals(dat.gameID(), gameID)){
-                    return dat;
-                }
-            }
-        }
-        else{
-            throw new DataAccessException("This game already exists");
-        }
-        return null;
+    public GameData getGame(int gameID){
+        return gameData.getOrDefault(gameID, null);
     }
 
     @Override
-    public ArrayList<GameData> listGames() {
-        return allGameData;
+    public HashMap<Integer, GameData> listGames() {
+        return gameData;
     }
 
     @Override
     public void updateGame(GameData dat) {
         int id = dat.gameID();
-        for(GameData oldDat : allGameData){
-            if(Objects.equals(oldDat.gameID(), id)){
-                allGameData.remove(oldDat);
-                allGameData.add(dat);
-            }
-        }
+        gameData.put(id, dat);
     }
 
     @Override
     public void clear() {
-        allGameData = new ArrayList<>();
-        allGameIDs = new ArrayList<>();
+        gameData = new HashMap<>();
     }
 }
