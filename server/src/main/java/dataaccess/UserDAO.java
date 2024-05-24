@@ -2,41 +2,28 @@ package dataaccess;
 
 import model.UserData;
 
-import java.util.Collection;
-import java.util.Objects;
+import java.util.HashMap;
 
 public class UserDAO implements UserDAOInterface{
-    Collection<UserData> allUsers;
-    Collection<String> allUsernames;
+    static HashMap<String, UserData> userData;
 
-    UserDAO(){}
+    public UserDAO(){}
 
     @Override
-    public void createUser(UserData data) throws DataAccessException{
-        String user = data.username();
-        if(!allUsernames.contains(user)){
-            allUsernames.add(user);
-            allUsers.add(data);
-        }
-        else{
-            String errorMessage = String.format("The user '%s' already exists", user);
-            throw new DataAccessException(errorMessage);
+    public void createUser(UserData data){
+        String username = data.username();
+        if(!userData.containsKey(username)){
+            userData.put(username, data);
         }
     }
 
     @Override
     public UserData getUser(String username) {
-        for(UserData user : allUsers){
-            if(Objects.equals(user.username(), username)){
-                return user;
-            }
-        }
-        return null;
+        return userData.getOrDefault(username, null);
     }
 
     @Override
     public void clear() {
-        allUsers.clear();
-        allUsernames.clear();
+        userData = new HashMap<>();
     }
 }

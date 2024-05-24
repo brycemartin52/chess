@@ -5,7 +5,7 @@ import model.AuthData;
 import java.util.UUID;
 
 public interface AuthDAOInterface {
-    default String createAuth(String username) throws DataAccessException{
+    default String createAuth(String username){
         return UUID.randomUUID().toString();
     }
 
