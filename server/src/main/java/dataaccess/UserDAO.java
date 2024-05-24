@@ -11,10 +11,7 @@ public class UserDAO implements UserDAOInterface{
 
     @Override
     public void createUser(UserData data){
-        String username = data.username();
-        if(!userData.containsKey(username)){
-            userData.put(username, data);
-        }
+        userData.put(data.username(), data);
     }
 
     @Override

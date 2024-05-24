@@ -1,11 +1,8 @@
 package dataaccess;
 
 import model.AuthData;
-import model.UserData;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Objects;
 
 public class AuthDAO implements AuthDAOInterface{
     static HashMap<String, AuthData> authData;
@@ -30,10 +27,12 @@ public class AuthDAO implements AuthDAOInterface{
     }
 
     @Override
-    public void deleteAuth(String authToken) {
-        if(!authToken.isEmpty()){
+    public boolean deleteAuth(String authToken) {
+        if(authData.containsKey(authToken)){
             authData.remove(authToken);
+            return true;
         }
+        return false;
     }
 
     @Override

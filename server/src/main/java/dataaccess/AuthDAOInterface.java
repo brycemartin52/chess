@@ -11,7 +11,7 @@ public interface AuthDAOInterface {
 
     AuthData getAuth(String authToken);
 
-    void deleteAuth(String authToken);
+    boolean deleteAuth(String authToken);
 
     void clear();
 }

@@ -28,14 +28,14 @@ public class UserService {
 
     public AuthData login(UserData user) throws DataAccessException {
         if(udao.getUser(user.username()) != null){
-            udao.createUser(user);
             return adao.addAuth(user.username());
         }
         else{
-            String errorMessage = String.format("The user '%s' doesn't exist: register to create an account", user);
-            throw new DataAccessException(errorMessage);
+            throw new DataAccessException(String.format("The user '%s' doesn't exist: register to create an account", user));
         }
     }
 
-    public void logout(UserData user) {}
+    public boolean logout(String authToken){
+        return adao.deleteAuth(authToken);
+    }
 }
