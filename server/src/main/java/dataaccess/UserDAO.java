@@ -7,7 +7,9 @@ import java.util.HashMap;
 public class UserDAO implements UserDAOInterface{
     static HashMap<String, UserData> userData;
 
-    public UserDAO(){}
+    public UserDAO(){
+        userData = new HashMap<>();
+    }
 
     @Override
     public void createUser(UserData data){
@@ -22,5 +24,10 @@ public class UserDAO implements UserDAOInterface{
     @Override
     public void clear() {
         userData = new HashMap<>();
+    }
+
+    public String getPassword(String username) {
+        UserData user = userData.get(username);
+        return user.password();
     }
 }

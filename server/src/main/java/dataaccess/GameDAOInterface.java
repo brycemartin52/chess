@@ -2,12 +2,11 @@ package dataaccess;
 
 import model.GameData;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 
 public interface GameDAOInterface {
 
-    void createGame(GameData dat);
+    int createGame(String gameName);
 
     GameData getGame(int gameID) throws DataAccessException;
 
@@ -15,5 +14,5 @@ public interface GameDAOInterface {
 
     void updateGame(GameData dat);
 
-    void clear();
+    boolean clear();
 }

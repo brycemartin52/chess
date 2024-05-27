@@ -1,21 +1,29 @@
 package dataaccess;
 
+import chess.ChessGame;
 import model.GameData;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
-public class GameDAO implements GameDAOInterface{
+public class GameDAO implements GameDAOInterface {
 
     HashMap<Integer, GameData> gameData;
+    ArrayList<String> gameNames;
     int numGames;
 
-    public GameDAO(){}
+    public GameDAO(){
+        gameData = new HashMap<>();
+        gameNames = new ArrayList<>();
+        numGames = 0;
+    }
 
     @Override
-    public void createGame(GameData dat) {
+    public int createGame(String gameName) {
         numGames++;
-        int id = dat.gameID();
-        gameData.put(id, dat);
+        GameData newGame = new GameData(numGames, null, null, gameName, new ChessGame());
+        gameData.put(numGames, newGame);
+        return numGames;
     }
 
     @Override
@@ -31,11 +39,13 @@ public class GameDAO implements GameDAOInterface{
     @Override
     public void updateGame(GameData dat) {
         int id = dat.gameID();
+        gameData.remove(id);
         gameData.put(id, dat);
     }
 
     @Override
-    public void clear() {
+    public boolean clear() {
         gameData = new HashMap<>();
+        return true;
     }
 }

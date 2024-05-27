@@ -7,7 +7,9 @@ import java.util.HashMap;
 public class AuthDAO implements AuthDAOInterface{
     static HashMap<String, AuthData> authData;
 
-    public AuthDAO(){}
+    public AuthDAO(){
+        authData = new HashMap<>();
+    }
 
     public AuthData addAuth(String username){
         String authToken = createAuth(username);

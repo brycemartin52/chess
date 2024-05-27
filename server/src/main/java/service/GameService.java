@@ -5,7 +5,10 @@ import dataaccess.DataAccessException;
 import dataaccess.GameDAO;
 import dataaccess.UserDAO;
 import model.AuthData;
+import model.GameData;
 import model.UserData;
+
+import java.util.HashMap;
 
 public class GameService {
     UserDAO udao;
@@ -21,28 +24,23 @@ public class GameService {
     public int createGame(String authToken, String gameName) throws DataAccessException {
         AuthData authData = adao.getAuth(authToken);
         if(authData == null){
-            throw new DataAccessException("You are not authorized to create a game.");
+            throw new DataAccessException("Error: unauthorized");
         }
-//        int i = 0;
-//        if(gdao.getGame()){
-//            udao.createUser(user);
-//            return login(user);
-//        }
-//        else{
-//            throw new DataAccessException(String.format("The user '%s' already exists", user));
-//        }
+        int id = gdao.createGame(gameName);
+        return id;
     }
 
-    public AuthData login(UserData user) throws DataAccessException {
-        if(udao.getUser(user.username()) != null){
-            return adao.addAuth(user.username());
+    public HashMap<Integer, GameData> listGames(String authToken) throws DataAccessException {
+        AuthData aData = adao.getAuth(authToken);
+        if(aData != null){
+            return gdao.listGames();
         }
-        else{
-            throw new DataAccessException(String.format("The user '%s' doesn't exist: register to create an account", user));
-        }
+        throw new DataAccessException("Error: unauthorized");
     }
 
-    public boolean logout(String authToken){
-        return adao.deleteAuth(authToken);
+    public void clearGame(){
+        gdao.clear();
     }
+
+
 }
