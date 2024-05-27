@@ -177,9 +177,8 @@ public class Server {
         JoinGameData body = gSerializer.joinDeserializer(request.body());
         try{
             GameData gData = gService.joinGame(header, body);
-            String game = gSerializer.gameSerializer(gData);
             response.status(200);
-            return game;
+            return "{}";
         }
         catch(DataAccessException e){
             if(e.getMessage().equals("Error: unauthorized")){

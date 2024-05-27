@@ -38,7 +38,10 @@ public class UserService {
         if(user == null || user.username() == null){
             throw new DataAccessException("'null' is an invalid user.");
         }
-        if(!Objects.equals(user.password(), udao.getPassword(user.username()))){
+        if(udao.getUser(user.username()) == null){
+            return new AuthData(null, user.username());
+        }
+        if(!user.password().equals(udao.getPassword(user.username()))){
             return new AuthData(null, user.username());
         }
         if(udao.getUser(user.username()) != null){
