@@ -6,6 +6,7 @@ import dataaccess.ErrorMessage;
 import gson.gsonSerializer;
 import model.AuthData;
 import model.GameData;
+import model.JoinGameData;
 import model.UserData;
 import service.AuthService;
 import service.GameService;
@@ -41,7 +42,7 @@ public class Server {
         Spark.delete("/session", this::logoutHandler);
         Spark.get("/game", this::listGameHandler);
         Spark.post("/game", this::createGameHandler);
-//        Spark.put("/game", this::joinGameHandler);
+        Spark.put("/game", this::joinGameHandler);
 
         Spark.awaitInitialization();
         return Spark.port();
@@ -167,6 +168,35 @@ public class Server {
             ErrorMessage error = new ErrorMessage("Error: already taken");
             String message = gSerializer.errSerializer(error);
             response.status(401);
+            return message;
+        }
+    }
+
+    private Object joinGameHandler(Request request, Response response) {
+        String header = request.headers("authorization");
+        JoinGameData body = gSerializer.joinDeserializer(request.body());
+        try{
+            GameData gData = gService.joinGame(header, body);
+            String game = gSerializer.gameSerializer(gData);
+            response.status(200);
+            return game;
+        }
+        catch(DataAccessException e){
+            if(e.getMessage().equals("Error: unauthorized")){
+                ErrorMessage error = new ErrorMessage("Error: unauthorized");
+                String message = gSerializer.errSerializer(error);
+                response.status(401);
+                return message;
+            }
+            if(e.getMessage().equals("Error: bad request")){
+                ErrorMessage error = new ErrorMessage("Error: unauthorized");
+                String message = gSerializer.errSerializer(error);
+                response.status(400);
+                return message;
+            }
+            ErrorMessage error = new ErrorMessage("Error: already taken");
+            String message = gSerializer.errSerializer(error);
+            response.status(403);
             return message;
         }
     }
