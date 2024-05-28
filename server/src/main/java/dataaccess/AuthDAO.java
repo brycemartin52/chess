@@ -20,6 +20,9 @@ public class AuthDAO implements AuthDAOInterface{
 
     @Override
     public AuthData getAuth(String authToken) {
+        if(authToken == null){
+            return null;
+        }
         if(!authToken.isEmpty() && authData.containsKey(authToken)){
             return authData.get(authToken);
         }

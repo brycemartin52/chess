@@ -60,14 +60,6 @@ public class Server {
             aService.clearAuths();
             response.status(200);
             return "{}";
-//        }
-
-//        catch () {
-//            String res = "{\"message\": \"Error: (description of error)\"}";
-//            response.status(500);
-//            return res;
-//        }
-
     }
 
     private Object registerHandler(Request request, Response response){
