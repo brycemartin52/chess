@@ -1,6 +1,7 @@
 package server;
 
 import chess.ChessGame;
+import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import dataaccess.ErrorMessage;
 import gson.gsonSerializer;
@@ -13,7 +14,10 @@ import service.GameService;
 import service.UserService;
 import spark.*;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Map;
 
 public class Server {
     gsonSerializer gSerializer;
@@ -141,12 +145,12 @@ public class Server {
         String header = request.headers("authorization");
         try{
             HashMap<Integer, GameData> games = gService.listGames(header);
-            String allGames = gSerializer.gamesSerializer(games);
+            Collection<GameData> list = games.values();
             response.status(200);
-            return allGames;
+            return new Gson().toJson(Map.of("games", list));
         }
         catch(DataAccessException e){
-            ErrorMessage error = new ErrorMessage("Error: already taken");
+            ErrorMessage error = new ErrorMessage("Error: unauthorized");
             String message = gSerializer.errSerializer(error);
             response.status(401);
             return message;
