@@ -5,6 +5,21 @@ import java.util.Collection;
 
 public class AllMoves {
 
+    public static boolean maybeAdd(int row, int col, ChessBoard board, ChessPosition ogPos, Collection<ChessMove> moves, ChessGame.TeamColor team){
+        ChessPosition otherPos = new ChessPosition(row, col);
+        ChessPiece otherPiece = board.getPiece(otherPos);
+        if(otherPiece == null){
+            moves.add(new ChessMove(ogPos, otherPos));
+        }
+        else{
+            if(otherPiece.getTeamColor() != team){
+                moves.add(new ChessMove(ogPos, otherPos));
+            }
+            return false;
+        }
+        return true;
+    }
+
     public static void straight(ChessBoard board, ChessPosition ogPos, Collection<ChessMove> moves){
         ChessPiece piece = board.getPiece(ogPos);
         ChessGame.TeamColor team = piece.getTeamColor();
@@ -13,67 +28,31 @@ public class AllMoves {
 
         int row = ogR;
         int col = ogC;
-        while(row < 8){
+        boolean cont = true;
+        while(row < 8 && cont){
             row++;
-            ChessPosition otherPos = new ChessPosition(row, col);
-            ChessPiece otherPiece = board.getPiece(otherPos);
-            if(otherPiece == null){
-                moves.add(new ChessMove(ogPos, otherPos));
-            }
-            else{
-                if(otherPiece.getTeamColor() != team){
-                    moves.add(new ChessMove(ogPos, otherPos));
-                }
-                break;
-            }
+            cont = maybeAdd(row, col, board, ogPos, moves, team);
         }
         row = ogR;
+        cont = true;
 
-        while(row > 1){
+        while(row > 1 && cont){
             row--;
-            ChessPosition otherPos = new ChessPosition(row, col);
-            ChessPiece otherPiece = board.getPiece(otherPos);
-            if(otherPiece == null){
-                moves.add(new ChessMove(ogPos, otherPos));
-            }
-            else{
-                if(otherPiece.getTeamColor() != team){
-                    moves.add(new ChessMove(ogPos, otherPos));
-                }
-                break;
-            }
+            cont = maybeAdd(row, col, board, ogPos, moves, team);
         }
         row = ogR;
+        cont = true;
 
-        while(col < 8){
+        while(col < 8 && cont){
             col++;
-            ChessPosition otherPos = new ChessPosition(row, col);
-            ChessPiece otherPiece = board.getPiece(otherPos);
-            if(otherPiece == null){
-                moves.add(new ChessMove(ogPos, otherPos));
-            }
-            else{
-                if(otherPiece.getTeamColor() != team){
-                    moves.add(new ChessMove(ogPos, otherPos));
-                }
-                break;
-            }
+            cont = maybeAdd(row, col, board, ogPos, moves, team);
         }
         col = ogC;
+        cont = true;
 
-        while(col > 1){
+        while(col > 1 && cont){
             col--;
-            ChessPosition otherPos = new ChessPosition(row, col);
-            ChessPiece otherPiece = board.getPiece(otherPos);
-            if(otherPiece == null){
-                moves.add(new ChessMove(ogPos, otherPos));
-            }
-            else{
-                if(otherPiece.getTeamColor() != team){
-                    moves.add(new ChessMove(ogPos, otherPos));
-                }
-                break;
-            }
+            cont = maybeAdd(row, col, board, ogPos, moves, team);
         }
     }
 
@@ -86,74 +65,38 @@ public class AllMoves {
 
         int row = ogR;
         int col = ogC;
-        while(row < 8 && col < 8){
+        boolean cont = true;
+        while(row < 8 && col < 8 && cont){
             row++;
             col++;
-            ChessPosition otherPos = new ChessPosition(row, col);
-            ChessPiece otherPiece = board.getPiece(otherPos);
-            if(otherPiece == null){
-                moves.add(new ChessMove(ogPos, otherPos));
-            }
-            else{
-                if(otherPiece.getTeamColor() != team){
-                    moves.add(new ChessMove(ogPos, otherPos));
-                }
-                break;
-            }
+            cont = maybeAdd(row, col, board, ogPos, moves, team);
         }
         row = ogR;
         col = ogC;
+        cont = true;
 
-        while(row > 1 && col < 8){
+        while(row > 1 && col < 8 && cont){
             row--;
             col++;
-            ChessPosition otherPos = new ChessPosition(row, col);
-            ChessPiece otherPiece = board.getPiece(otherPos);
-            if(otherPiece == null){
-                moves.add(new ChessMove(ogPos, otherPos));
-            }
-            else{
-                if(otherPiece.getTeamColor() != team){
-                    moves.add(new ChessMove(ogPos, otherPos));
-                }
-                break;
-            }
+            cont = maybeAdd(row, col, board, ogPos, moves, team);
         }
         row = ogR;
         col = ogC;
+        cont = true;
 
-        while(row < 8 && col > 1){
+        while(row < 8 && col > 1 && cont){
             row++;
             col--;
-            ChessPosition otherPos = new ChessPosition(row, col);
-            ChessPiece otherPiece = board.getPiece(otherPos);
-            if(otherPiece == null){
-                moves.add(new ChessMove(ogPos, otherPos));
-            }
-            else{
-                if(otherPiece.getTeamColor() != team){
-                    moves.add(new ChessMove(ogPos, otherPos));
-                }
-                break;
-            }
+            cont = maybeAdd(row, col, board, ogPos, moves, team);
         }
         row = ogR;
         col = ogC;
+        cont = true;
 
-        while(row > 1 && col > 1){
+        while(row > 1 && col > 1 && cont){
             row--;
             col--;
-            ChessPosition otherPos = new ChessPosition(row, col);
-            ChessPiece otherPiece = board.getPiece(otherPos);
-            if(otherPiece == null){
-                moves.add(new ChessMove(ogPos, otherPos));
-            }
-            else{
-                if(otherPiece.getTeamColor() != team){
-                    moves.add(new ChessMove(ogPos, otherPos));
-                }
-                break;
-            }
+            cont = maybeAdd(row, col, board, ogPos, moves, team);
         }
     }
 
