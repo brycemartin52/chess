@@ -57,7 +57,7 @@ public class ServiceUnitTests {
     }
 
     @Test
-    @Order(2)
+    @Order(3)
     @DisplayName("Register Bad Test")
     public void registerBadTest() {
         try{
@@ -71,7 +71,7 @@ public class ServiceUnitTests {
     }
 
     @Test
-    @Order(3)
+    @Order(4)
     @DisplayName("Login Good Test")
     public void loginTest() {
         try{
@@ -87,7 +87,7 @@ public class ServiceUnitTests {
     }
 
     @Test
-    @Order(3)
+    @Order(5)
     @DisplayName("Login Bad Test")
     public void loginBadTest() {
         try{
@@ -102,7 +102,7 @@ public class ServiceUnitTests {
 
 
     @Test
-    @Order(4)
+    @Order(6)
     @DisplayName("Logout Good Test")
     public void logoutTest() {
         try{
@@ -118,7 +118,7 @@ public class ServiceUnitTests {
     }
 
     @Test
-    @Order(4)
+    @Order(7)
     @DisplayName("Logout Bad Test")
     public void logoutBadTest() {
         try{
@@ -133,7 +133,7 @@ public class ServiceUnitTests {
     }
 
     @Test
-    @Order(5)
+    @Order(8)
     @DisplayName("List a Game")
     public void listGame() {
         AuthData aData = authService.add(user.username());
@@ -151,7 +151,7 @@ public class ServiceUnitTests {
     }
 
     @Test
-    @Order(5)
+    @Order(9)
     @DisplayName("List Game, bad token")
     public void listGameUnauthorized() {
         AuthData aData = authService.add(user.username());
@@ -169,7 +169,7 @@ public class ServiceUnitTests {
 
 
     @Test
-    @Order(6)
+    @Order(10)
     @DisplayName("Create a Game")
     public void addGame() {
         AuthData aData = authService.add(user.username());
@@ -187,7 +187,7 @@ public class ServiceUnitTests {
     }
 
     @Test
-    @Order(6)
+    @Order(11)
     @DisplayName("Create a Game with a bad Token")
     public void addGameUnauthorized() {
         try{
@@ -201,7 +201,7 @@ public class ServiceUnitTests {
     }
 
     @Test
-    @Order(7)
+    @Order(12)
     @DisplayName("Join a Game")
     public void joinGame() {
         AuthData aData = authService.add(user.username());
@@ -219,7 +219,7 @@ public class ServiceUnitTests {
     }
 
     @Test
-    @Order(7)
+    @Order(13)
     @DisplayName("Join a Game via stealing")
     public void joinGameIllegally() {
         AuthData aData = authService.add(user.username());
