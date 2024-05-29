@@ -77,32 +77,6 @@ public class AllMoves {
         }
     }
 
-    public static Collection<ChessMove> collectDiagonals(ChessBoard board, ChessPosition ogPos, Collection<ChessMove> moves, int rowAdd, int colAdd){
-        int ogR = ogPos.getRow();
-        int ogC = ogPos.getColumn();
-
-        int row = ogR;
-        int col = ogC;
-        while(row < 8 && col < 8){
-            row += rowAdd;
-            col += colAdd;
-            ChessPosition otherPos = new ChessPosition(row, col);
-            ChessPiece otherPiece = board.getPiece(otherPos);
-            if(otherPiece == null){
-                moves.add(new ChessMove(ogPos, otherPos));
-            }
-            else{
-                if(otherPiece.getTeamColor() != board.getPiece(ogPos).getTeamColor()){
-                    moves.add(new ChessMove(ogPos, otherPos));
-                }
-                break;
-            }
-        }
-        row = ogR;
-        col = ogC;
-
-        return moves;
-    }
 
     public static void diagonal(ChessBoard board, ChessPosition ogPos, Collection<ChessMove> moves){
         ChessPiece piece = board.getPiece(ogPos);
