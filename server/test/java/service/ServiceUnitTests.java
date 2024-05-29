@@ -7,7 +7,7 @@ import org.junit.jupiter.api.*;
 import java.util.HashMap;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class ServiceTests {
+public class ServiceUnitTests {
 
     private static GameService gameService;
     private static AuthService authService;

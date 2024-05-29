@@ -8,12 +8,10 @@ import model.GameData;
 import model.JoinGameData;
 import model.UserData;
 
-import java.util.Collection;
-
-public class gsonSerializer {
+public class GsonSerializer {
     Gson serializer;
 
-    public gsonSerializer(){
+    public GsonSerializer(){
         serializer = new Gson();
     }
 

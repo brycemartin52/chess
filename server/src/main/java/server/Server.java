@@ -4,7 +4,7 @@ import chess.ChessGame;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import dataaccess.ErrorMessage;
-import gson.gsonSerializer;
+import gson.GsonSerializer;
 import model.AuthData;
 import model.GameData;
 import model.JoinGameData;
@@ -14,19 +14,18 @@ import service.GameService;
 import service.UserService;
 import spark.*;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
 public class Server {
-    gsonSerializer gSerializer;
+    GsonSerializer gSerializer;
     GameService gService;
     UserService uService;
     AuthService aService;
 
     public Server(){
-        gSerializer = new gsonSerializer();
+        gSerializer = new GsonSerializer();
 
         gService = new GameService();
         uService = new UserService();
