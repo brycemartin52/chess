@@ -116,14 +116,8 @@ public class AllMoves {
         diagonal(board, ogPos, moves);
         return moves;
     }
-    public static Collection<ChessMove> kingMoves(ChessBoard board, ChessPosition ogPos){
-        Collection<ChessMove> moves = new ArrayList<>();
-        ChessGame.TeamColor team = board.getPiece(ogPos).getTeamColor();
-        int ogR = ogPos.getRow();
-        int ogC = ogPos.getColumn();
 
-        int[][] posMoves = {{1,1}, {1,0}, {1,-1}, {0,1}, {0,-1}, {-1,1}, {-1,0}, {-1,-1}};
-
+    public static void kingKnightMoves(int[][] posMoves, int ogR, int ogC, ChessBoard board, ChessPosition ogPos, ChessGame.TeamColor team, Collection<ChessMove> moves){
         for(int i = 0; i <= 7; i++){
             int row = posMoves[i][0] + ogR;
             int col = posMoves[i][1] + ogC;
@@ -141,6 +135,17 @@ public class AllMoves {
                 }
             }
         }
+    }
+
+    public static Collection<ChessMove> kingMoves(ChessBoard board, ChessPosition ogPos){
+        Collection<ChessMove> moves = new ArrayList<>();
+        ChessGame.TeamColor team = board.getPiece(ogPos).getTeamColor();
+        int ogR = ogPos.getRow();
+        int ogC = ogPos.getColumn();
+
+        int[][] posMoves = {{1,1}, {1,0}, {1,-1}, {0,1}, {0,-1}, {-1,1}, {-1,0}, {-1,-1}};
+
+        kingKnightMoves(posMoves, ogR, ogC, board, ogPos, team, moves);
 
         return moves;
     }
@@ -152,23 +157,7 @@ public class AllMoves {
 
         int[][] posMoves = {{1,2}, {2,1}, {1,-2}, {2, -1}, {-1,2}, {-2,1}, {-1,-2}, {-2, -1}};
 
-        for(int i = 0; i <= 7; i++){
-            int row = posMoves[i][0] + ogR;
-            int col = posMoves[i][1] + ogC;
-
-            if(1 <= row && row <= 8 && 1 <= col && col <= 8){
-                ChessPosition otherPos = new ChessPosition(row, col);
-                ChessPiece otherPiece = board.getPiece(otherPos);
-                if(otherPiece == null){
-                    moves.add(new ChessMove(ogPos, otherPos));
-                }
-                else{
-                    if(otherPiece.getTeamColor() != team){
-                        moves.add(new ChessMove(ogPos, otherPos));
-                    }
-                }
-            }
-        }
+        kingKnightMoves(posMoves, ogR, ogC, board, ogPos, team, moves);
 
         return moves;
     }
