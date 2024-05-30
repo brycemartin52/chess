@@ -3,6 +3,7 @@ package server;
 import chess.ChessGame;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
+import dataaccess.DatabaseManager;
 import dataaccess.ErrorMessage;
 import gson.GsonSerializer;
 import model.AuthData;
