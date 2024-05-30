@@ -9,4 +9,6 @@ public interface UserDAOInterface {
     UserData getUser(String username);
 
     void clear();
+
+    String getPassword(String username);
 }

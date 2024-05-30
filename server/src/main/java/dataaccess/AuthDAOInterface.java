@@ -9,6 +9,8 @@ public interface AuthDAOInterface {
         return UUID.randomUUID().toString();
     }
 
+    AuthData addAuth(String username);
+
     AuthData getAuth(String authToken);
 
     boolean deleteAuth(String authToken);
