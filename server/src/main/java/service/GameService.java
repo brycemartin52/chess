@@ -1,10 +1,7 @@
 package service;
 
 import chess.ChessGame;
-import dataaccess.AuthDAO;
-import dataaccess.DataAccessException;
-import dataaccess.GameDAO;
-import dataaccess.UserDAO;
+import dataaccess.*;
 import model.AuthData;
 import model.GameData;
 import model.JoinGameData;
@@ -13,14 +10,19 @@ import model.UserData;
 import java.util.HashMap;
 
 public class GameService {
-    UserDAO udao;
-    AuthDAO adao;
-    GameDAO gdao;
+    SQLUserDAO udao;
+    SQLAuthDAO adao;
+    SQLGameDAO gdao;
 
-    public GameService(){
-        udao = new UserDAO();
-        adao = new AuthDAO();
-        gdao = new GameDAO();
+    public GameService() throws DataAccessException {
+        try{
+        udao = new SQLUserDAO();
+        adao = new SQLAuthDAO();
+        gdao = new SQLGameDAO();
+        }
+        catch(Exception e){
+        System.out.println("The GameService failed to start up");
+        }
     }
 
     public int createGame(String authToken, String gameName) throws DataAccessException {
@@ -73,7 +75,12 @@ public class GameService {
     }
 
     public void clearGame(){
-        gdao.clear();
+        try{
+            gdao.clear();
+        }
+        catch (DataAccessException e) {
+            System.out.println("The Game Service failed to start up");
+        }
     }
 
 

@@ -6,13 +6,13 @@ import java.util.HashMap;
 
 public interface GameDAOInterface {
 
-    int createGame(String gameName);
+    int createGame(String gameName) throws DataAccessException;
 
     GameData getGame(int gameID) throws DataAccessException;
 
-    HashMap<Integer, GameData> listGames();
+    HashMap<Integer, GameData> listGames() throws DataAccessException;
 
-    void updateGame(GameData dat);
+    void updateGame(GameData dat) throws DataAccessException;
 
-    boolean clear();
+    boolean clear() throws DataAccessException;
 }

@@ -27,4 +27,7 @@ public class GsonSerializer {
         return serializer.fromJson(user, UserData.class);
     }
     public JoinGameData joinDeserializer(String req) { return serializer.fromJson(req, JoinGameData.class); }
+    public GameData gameDeserializer(String game){
+        return serializer.fromJson(game, GameData.class);
+    }
 }

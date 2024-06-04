@@ -1,21 +1,24 @@
 package service;
 
-import dataaccess.DataAccessException;
+import dataaccess.*;
 
-import dataaccess.AuthDAO;
-import dataaccess.UserDAO;
 import model.AuthData;
 import model.UserData;
 
 import java.util.Objects;
 
 public class UserService {
-    UserDAO udao;
-    AuthDAO adao;
+    SQLUserDAO udao;
+    SQLAuthDAO adao;
 
     public UserService(){
-        udao = new UserDAO();
-        adao = new AuthDAO();
+        try{
+            udao = new SQLUserDAO();
+            adao = new SQLAuthDAO();
+        }
+        catch(Exception e){
+            System.out.println("The database failed to start up");
+        }
     }
 
     public AuthData register(UserData user) throws DataAccessException {
@@ -57,6 +60,12 @@ public class UserService {
     }
 
     public void clearUsers() {
-        udao.clear();
+        try{
+            udao.clear();
+        }
+        catch (DataAccessException e){
+            System.out.println("The database failed to clear.");
+        }
+
     }
 }

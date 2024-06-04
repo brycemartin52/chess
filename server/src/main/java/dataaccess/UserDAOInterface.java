@@ -4,11 +4,11 @@ import model.UserData;
 
 public interface UserDAOInterface {
 
-    void createUser(UserData dat);
+    void createUser(UserData dat) throws DataAccessException ;
 
-    UserData getUser(String username);
+    UserData getUser(String username) throws DataAccessException;
 
-    void clear();
+    void clear() throws DataAccessException;
 
-    String getPassword(String username);
+    String getPassword(String username) throws DataAccessException;
 }
