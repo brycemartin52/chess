@@ -15,7 +15,7 @@ public class SQLUserDAO implements UserDAOInterface{
 
     @Override
     public void createUser(UserData dat) throws DataAccessException {
-        var statement = "INSERT INTO userData (username, password, email) VALUES (?, ?, ?)";
+        var statement = "INSERT INTO userData (username, password, email) VALUES (?, ?, ?);";
         executeUpdate(statement, dat.username(), dat.password(), dat.email());
     }
 
@@ -29,7 +29,7 @@ public class SQLUserDAO implements UserDAOInterface{
     @Override
     public UserData getUser(String username) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT username, password, email FROM userData WHERE username=?";
+            var statement = "SELECT username, password, email FROM userData WHERE username=?;";
             try (var ps = conn.prepareStatement(statement)) {
                 ps.setString(1, username);
                 try (ResultSet rs = ps.executeQuery()) {
@@ -46,7 +46,7 @@ public class SQLUserDAO implements UserDAOInterface{
 
     @Override
     public void clear() throws DataAccessException {
-        var statement = "TRUNCATE userData";
+        var statement = "TRUNCATE userData;";
         executeUpdate(statement);
     }
 

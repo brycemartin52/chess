@@ -9,11 +9,11 @@ public interface AuthDAOInterface {
         return UUID.randomUUID().toString();
     }
 
-    AuthData addAuth(String username);
+    AuthData addAuth(String username) throws DataAccessException;
 
-    AuthData getAuth(String authToken);
+    AuthData getAuth(String authToken) throws DataAccessException;
 
-    boolean deleteAuth(String authToken);
+    boolean deleteAuth(String authToken) throws DataAccessException;
 
-    void clear();
+    void clear() throws DataAccessException;
 }

@@ -20,7 +20,7 @@ public class SQLGameDAO implements GameDAOInterface {
 
     @Override
     public int createGame(String gameName) throws DataAccessException {
-        var statement = "INSERT INTO game (gameName, game) VALUES (?, ?)";
+        var statement = "INSERT INTO gameData (gameName, game) VALUES (?, ?);";
         ChessGame newGame = new ChessGame();
         return executeUpdate(statement, gameName, newGame);
     }
@@ -33,7 +33,7 @@ public class SQLGameDAO implements GameDAOInterface {
     @Override
     public GameData getGame(int gameID) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT gameid, game FROM game WHERE id=?";
+            var statement = "SELECT gameid, game FROM gameData WHERE id=?;";
             try (var ps = conn.prepareStatement(statement)) {
                 ps.setInt(1, gameID);
                 try (var rs = ps.executeQuery()) {
@@ -52,7 +52,7 @@ public class SQLGameDAO implements GameDAOInterface {
     public HashMap<Integer, GameData> listGames() throws DataAccessException {
         var result = new HashMap<Integer, GameData>();
         try (var conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT gameID, game FROM game";
+            var statement = "SELECT gameID, game FROM gameData;";
             try (var ps = conn.prepareStatement(statement)) {
                 try (var rs = ps.executeQuery()) {
                     while (rs.next()) {
@@ -69,13 +69,13 @@ public class SQLGameDAO implements GameDAOInterface {
 
     @Override
     public void updateGame(GameData newGame) throws DataAccessException {
-        var statement = "UPDATE game SET game = dat WHERE id=?";
+        var statement = "UPDATE gameData SET game = dat WHERE id=?;";
         executeUpdate(statement, newGame);
     }
 
     @Override
     public boolean clear() throws DataAccessException {
-        var statement = "TRUNCATE game";
+        var statement = "TRUNCATE gameData;";
         executeUpdate(statement);
         return true;
     }
@@ -106,7 +106,7 @@ public class SQLGameDAO implements GameDAOInterface {
 
     private final String[] createStatements = {
             """
-            CREATE TABLE IF NOT EXISTS game (
+            CREATE TABLE IF NOT EXISTS gameData (
               `gameID` int NOT NULL AUTO_INCREMENT,
               `whiteUsername` varchar(128) NULL,
               `blackUsername` varchar(128) NULL,

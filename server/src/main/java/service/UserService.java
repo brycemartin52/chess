@@ -56,7 +56,13 @@ public class UserService {
     }
 
     public boolean logout(String authToken){
-        return adao.deleteAuth(authToken);
+        try{
+            return adao.deleteAuth(authToken);
+        }
+        catch (DataAccessException e){
+            System.out.println("Unable to logout");
+            return false;
+        }
     }
 
     public void clearUsers() {
