@@ -26,11 +26,16 @@ public class Server {
     AuthService aService;
 
     public Server(){
+        try{
         gSerializer = new GsonSerializer();
 
         gService = new GameService();
         uService = new UserService();
         aService = new AuthService();
+        }
+        catch(Exception e){
+        System.out.println("The Server failed to start up");
+        }
     }
 
 
@@ -54,7 +59,6 @@ public class Server {
 
 
     private Object clearHandler(Request request, Response response) {
-//        try {
             gService.clearGame();
             uService.clearUsers();
             aService.clearAuths();
@@ -109,9 +113,10 @@ public class Server {
         }
 
         catch(DataAccessException e){
-            String res = "gSerializer.errSerializer(e)";
+            ErrorMessage error = new ErrorMessage("Error: already logged in");
+            String message = gSerializer.errSerializer(error);
             response.status(403);
-            return res;
+            return message;
         }
     }
 
@@ -151,7 +156,7 @@ public class Server {
 
     private Object createGameHandler(Request request, Response response) {
         String header = request.headers("authorization");
-        String body = request.body();
+        String body = gSerializer.gameDeserializer(request.body()).gameName();
         try{
             int code = gService.createGame(header, body);
             ChessGame newGame = new ChessGame();

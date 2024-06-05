@@ -17,8 +17,11 @@ public class SQLAuthDAO implements AuthDAOInterface{
     @Override
     public AuthData addAuth(String username) throws DataAccessException {
         String authToken = createAuth(username);
-        var statement = "INSERT INTO authData (username, authToken) VALUES (?, ?);";
-        executeUpdate(statement, username, authToken);
+//        var statement = "ALTER TABLE authData MODIFY COLUMN username VARCHAR(128);";
+//        executeUpdate(statement);
+
+        var newstatement = "INSERT INTO authData (username, authToken) VALUES (?, ?);";
+        executeUpdate(newstatement, username, authToken);
         return new AuthData(authToken, username);
     }
 
@@ -78,7 +81,7 @@ public class SQLAuthDAO implements AuthDAOInterface{
     private final String[] createStatements = {
             """
             CREATE TABLE IF NOT EXISTS authData (
-              `username` int NOT NULL,
+              `username` varchar(128) NOT NULL,
               `authToken` varchar(72) NULL,
               PRIMARY KEY (`username`),
               INDEX(authToken)

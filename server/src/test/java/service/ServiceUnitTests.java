@@ -17,11 +17,17 @@ public class ServiceUnitTests {
 
     @BeforeEach
     public void init() {
-        gameService = new GameService();
-        authService = new AuthService();
-        userService = new UserService();
-        user = new UserData("user", "password", "email");
-        badUser = new UserData(null, "password", "email");
+        try {
+            gameService = new GameService();
+            authService = new AuthService();
+            userService = new UserService();
+            user = new UserData("user", "password", "email");
+            badUser = new UserData(null, "password", "email");
+        }
+        catch (Exception e){
+            System.out.println("There was an error:");
+            System.out.println(e.getMessage());
+        }
     }
 
     @Test

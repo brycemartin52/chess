@@ -43,6 +43,8 @@ public class StandardAPITests {
         newUser = new TestUser("NewUser", "newUserPassword", "nu@mail.com");
 
         createRequest = new TestCreateRequest("testGame");
+
+
     }
 
     @BeforeEach

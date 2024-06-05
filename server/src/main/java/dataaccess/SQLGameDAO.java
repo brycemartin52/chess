@@ -33,7 +33,7 @@ public class SQLGameDAO implements GameDAOInterface {
     @Override
     public GameData getGame(int gameID) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT gameid, game FROM gameData WHERE id=?;";
+            var statement = "SELECT gameID, game FROM gameData WHERE gameID=?;";
             try (var ps = conn.prepareStatement(statement)) {
                 ps.setInt(1, gameID);
                 try (var rs = ps.executeQuery()) {
@@ -87,14 +87,14 @@ public class SQLGameDAO implements GameDAOInterface {
                     var param = params[i];
                     if (param instanceof String p) ps.setString(i + 1, p);
                     else if (param instanceof Integer p) ps.setInt(i + 1, p);
-                    else if (param instanceof GameData p) ps.setString(i + 1, p.toString());
+                    else if (param instanceof ChessGame p) ps.setString(i + 1, p.toString());
                     else if (param == null) ps.setNull(i + 1, NULL);
                 }
                 ps.executeUpdate();
 
                 var rs = ps.getGeneratedKeys();
                 if (rs.next()) {
-                    return rs.getInt("gameID");
+                    return rs.getInt(1);
                 }
 
                 return 0;
@@ -113,10 +113,7 @@ public class SQLGameDAO implements GameDAOInterface {
               `gameName` varchar(128) NULL,
               `game` longtext NULL,
               PRIMARY KEY (`gameID`),
-              INDEX(whiteUsername),
-              INDEX(blackUsername),
-              INDEX(gameName),
-              INDEX(game)
+              INDEX(gameName)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
             """
     };
