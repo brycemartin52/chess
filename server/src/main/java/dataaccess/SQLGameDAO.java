@@ -22,18 +22,23 @@ public class SQLGameDAO implements GameDAOInterface {
     public int createGame(String gameName) throws DataAccessException {
         var statement = "INSERT INTO gameData (gameName, game) VALUES (?, ?);";
         ChessGame newGame = new ChessGame();
-        return executeUpdate(statement, gameName, newGame);
+        String gameJson = gSerializer.chessGameSerializer(newGame);
+        return executeUpdate(statement, gameName, gameJson);
     }
 
     private GameData readGame(ResultSet rs) throws SQLException {
-        var json = rs.getString("game");
-        return gSerializer.gameDeserializer(json);
+        var game = gSerializer.chessGameDeserializer(rs.getString("game"));
+        var gameID = rs.getInt("gameID");
+        var whiteUsername = rs.getString("whiteUsername");
+        var blackUsername = rs.getString("blackUsername");
+        var gameName = rs.getString("gameName");
+        return new GameData(gameID, whiteUsername, blackUsername, gameName, game);
     }
 
     @Override
     public GameData getGame(int gameID) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT gameID, game FROM gameData WHERE gameID=?;";
+            var statement = "SELECT gameID, game, whiteUsername, blackUsername, gameName FROM gameData WHERE gameID=?;";
             try (var ps = conn.prepareStatement(statement)) {
                 ps.setInt(1, gameID);
                 try (var rs = ps.executeQuery()) {
@@ -52,7 +57,7 @@ public class SQLGameDAO implements GameDAOInterface {
     public HashMap<Integer, GameData> listGames() throws DataAccessException {
         var result = new HashMap<Integer, GameData>();
         try (var conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT gameID, game FROM gameData;";
+            var statement = "SELECT * FROM gameData;";
             try (var ps = conn.prepareStatement(statement)) {
                 try (var rs = ps.executeQuery()) {
                     while (rs.next()) {
@@ -69,8 +74,9 @@ public class SQLGameDAO implements GameDAOInterface {
 
     @Override
     public void updateGame(GameData newGame) throws DataAccessException {
-        var statement = "UPDATE gameData SET game = dat WHERE id=?;";
-        executeUpdate(statement, newGame);
+        var statement = "UPDATE gameData SET game = ?, whiteUsername = ?, blackUsername = ? WHERE gameID=?;";
+        String gameJson = gSerializer.chessGameSerializer(newGame.game());
+        executeUpdate(statement, gameJson, newGame.whiteUsername(), newGame.blackUsername(), newGame.gameID());
     }
 
     @Override
@@ -110,8 +116,8 @@ public class SQLGameDAO implements GameDAOInterface {
               `gameID` int NOT NULL AUTO_INCREMENT,
               `whiteUsername` varchar(128) NULL,
               `blackUsername` varchar(128) NULL,
-              `gameName` varchar(128) NULL,
-              `game` longtext NULL,
+              `gameName` varchar(128) NOT NULL,
+              `game` longtext NOT NULL,
               PRIMARY KEY (`gameID`),
               INDEX(gameName)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci

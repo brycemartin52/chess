@@ -17,9 +17,6 @@ public class SQLAuthDAO implements AuthDAOInterface{
     @Override
     public AuthData addAuth(String username) throws DataAccessException {
         String authToken = createAuth(username);
-//        var statement = "ALTER TABLE authData MODIFY COLUMN username VARCHAR(128);";
-//        executeUpdate(statement);
-
         var newstatement = "INSERT INTO authData (username, authToken) VALUES (?, ?);";
         executeUpdate(newstatement, username, authToken);
         return new AuthData(authToken, username);
@@ -28,7 +25,7 @@ public class SQLAuthDAO implements AuthDAOInterface{
     private AuthData readAuth(ResultSet rs) throws SQLException {
         var username = rs.getString("username");
         var authToken = rs.getString("authToken");
-        return new AuthData(username, authToken);
+        return new AuthData(authToken, username);
     }
 
     @Override
@@ -51,6 +48,10 @@ public class SQLAuthDAO implements AuthDAOInterface{
 
     @Override
     public boolean deleteAuth(String authToken) throws DataAccessException {
+        AuthData authData = getAuth(authToken);
+        if(authData == null){
+            return false;
+        }
         var statement = "DELETE FROM authData where authToken = ?;";
         executeUpdate(statement, authToken);
         return true;
@@ -82,9 +83,8 @@ public class SQLAuthDAO implements AuthDAOInterface{
             """
             CREATE TABLE IF NOT EXISTS authData (
               `username` varchar(128) NOT NULL,
-              `authToken` varchar(72) NULL,
-              PRIMARY KEY (`username`),
-              INDEX(authToken)
+              `authToken` varchar(72) NOT NULL,
+              PRIMARY KEY (`authToken`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
             """
     };

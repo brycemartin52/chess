@@ -4,6 +4,7 @@ import dataaccess.*;
 
 import model.AuthData;
 import model.UserData;
+import utils.encrypt;
 
 import java.util.Objects;
 
@@ -38,13 +39,13 @@ public class UserService {
     }
 
     public AuthData login(UserData user) throws DataAccessException {
-        if(user == null || user.username() == null){
-            throw new DataAccessException("'null' is an invalid user.");
+        if(user == null || user.username() == null || user.password() == null){
+            throw new DataAccessException("'null' is an invalid input.");
         }
         if(udao.getUser(user.username()) == null){
             return new AuthData(null, user.username());
         }
-        if(!user.password().equals(udao.getPassword(user.username()))){
+        if(!encrypt.compareHash(user.password(), udao.getPassword(user.username()))){
             return new AuthData(null, user.username());
         }
         if(udao.getUser(user.username()) != null){

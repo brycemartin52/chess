@@ -1,6 +1,7 @@
 package dataaccess;
 
 import model.UserData;
+import utils.encrypt;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -16,7 +17,8 @@ public class SQLUserDAO implements UserDAOInterface{
     @Override
     public void createUser(UserData dat) throws DataAccessException {
         var statement = "INSERT INTO userData (username, password, email) VALUES (?, ?, ?);";
-        executeUpdate(statement, dat.username(), dat.password(), dat.email());
+        String passwordHash = encrypt.getHash(dat.password());
+        executeUpdate(statement, dat.username(), passwordHash, dat.email());
     }
 
     private UserData readUser(ResultSet rs) throws SQLException {
@@ -77,10 +79,8 @@ public class SQLUserDAO implements UserDAOInterface{
             CREATE TABLE IF NOT EXISTS userData (
               `username` varchar(128) NOT NULL,
               `password` varchar(128) NOT NULL,
-              `email` varchar(128) NULL,
-              PRIMARY KEY (`username`),
-              INDEX(password),
-              INDEX(email)
+              `email` varchar(128) NOT NULL,
+              PRIMARY KEY (`username`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
             """
     };

@@ -1,5 +1,6 @@
 package gson;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 
 import dataaccess.ErrorMessage;
@@ -18,6 +19,7 @@ public class GsonSerializer {
     public String gameSerializer(GameData game){
         return serializer.toJson(game);
     }
+    public String chessGameSerializer(ChessGame game) {return serializer.toJson(game);}
     public String authSerializer(AuthData auth){
         return serializer.toJson(auth);
     }
@@ -30,4 +32,5 @@ public class GsonSerializer {
     public GameData gameDeserializer(String game){
         return serializer.fromJson(game, GameData.class);
     }
+    public ChessGame chessGameDeserializer(String game) {return serializer.fromJson(game, ChessGame.class);}
 }

@@ -1,13 +1,27 @@
-package service;
-
+package dataaccess;
+import chess.ChessGame;
+import model.AuthData;
+import model.GameData;
+import model.JoinGameData;
+import model.UserData;
+import org.junit.jupiter.api.*;
+import service.AuthService;
+import service.GameService;
+import service.UserService;
 import chess.ChessGame;
 import dataaccess.DataAccessException;
 import model.*;
 import org.junit.jupiter.api.*;
 import java.util.HashMap;
 
+import java.util.HashMap;
+
+
+
+
+
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class ServiceUnitTests {
+public class DatabaseUnitTests {
 
     private static GameService gameService;
     private static AuthService authService;
@@ -15,30 +29,47 @@ public class ServiceUnitTests {
     private static UserData user;
     private static UserData badUser;
 
-    @BeforeEach
-    public void init() {
+    private static SQLAuthDAO adao;
+    private static SQLGameDAO gdao;
+    private static SQLUserDAO udao;
+
+    @BeforeAll
+    public static void mainInit() {
         try {
-            gameService = new GameService();
-            authService = new AuthService();
-            userService = new UserService();
+            adao = new SQLAuthDAO();
+            udao = new SQLUserDAO();
+            gdao = new SQLGameDAO();
+
             user = new UserData("user", "password", "email");
             badUser = new UserData(null, "password", "email");
         }
         catch (Exception e){
-            System.out.println("There was an error:");
+            System.out.println("There was an error initializing the testing.");
             System.out.println(e.getMessage());
         }
     }
 
+//    @BeforeEach
+//    public void init() {
+//        try {
+//            user = new UserData("user", "password", "email");
+//            badUser = new UserData(null, "password", "email");
+//        }
+//        catch (Exception e){
+//            System.out.println("There was an error:");
+//            System.out.println(e.getMessage());
+//        }
+//    }
+
     @AfterEach
     public void del() {
         try {
-            gameService.clearGame();
-            authService.clearAuths();
-            userService.clearUsers();
+            gdao.clear();
+            adao.clear();
+            udao.clear();
         }
         catch (Exception e){
-            System.out.println("There was an error:");
+            System.out.println("There was an error in clearing:");
             System.out.println(e.getMessage());
         }
     }
@@ -47,15 +78,14 @@ public class ServiceUnitTests {
     @Order(1)
     @DisplayName("Clearing")
     public void clearTest() {
-        AuthData aData = authService.add(user.username());
-
-        try{
-            gameService.createGame(aData.authToken(), "New Game");
-            gameService.clearGame();
-            HashMap<Integer, GameData> games = gameService.listGames(aData.authToken());
-            Assertions.assertTrue(games.isEmpty());
+        try {
+            gdao.clear();
+            adao.clear();
+            udao.clear();
         }
-        catch (DataAccessException e){
+        catch (Exception e){
+            System.out.println("There was an error:");
+            System.out.println(e.getMessage());
             Assertions.fail();
         }
     }
@@ -70,7 +100,7 @@ public class ServiceUnitTests {
             Assertions.assertEquals(newAuthData, authData);
         }
         catch (DataAccessException e){
-            System.out.println("Doesn't work");
+            System.out.println("Registering doesn't work");
             Assertions.fail();
         }
     }
@@ -143,7 +173,7 @@ public class ServiceUnitTests {
         try{
             AuthData authData = userService.register(user);
             boolean success = userService.logout("badAuthToken");
-            Assertions.assertTrue(success);
+            Assertions.assertFalse(success);
         }
         catch (DataAccessException e){
             System.out.println("Doesn't work");
