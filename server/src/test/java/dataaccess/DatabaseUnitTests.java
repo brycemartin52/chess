@@ -1,33 +1,16 @@
 package dataaccess;
-import chess.ChessGame;
 import model.AuthData;
 import model.GameData;
-import model.JoinGameData;
 import model.UserData;
 import org.junit.jupiter.api.*;
-import service.AuthService;
-import service.GameService;
-import service.UserService;
-import chess.ChessGame;
-import dataaccess.DataAccessException;
-import model.*;
-import org.junit.jupiter.api.*;
-import java.util.HashMap;
 
 import java.util.HashMap;
-
-
-
-
+import java.util.Objects;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class DatabaseUnitTests {
 
-    private static GameService gameService;
-    private static AuthService authService;
-    private static UserService userService;
     private static UserData user;
-    private static UserData badUser;
 
     private static SQLAuthDAO adao;
     private static SQLGameDAO gdao;
@@ -41,25 +24,12 @@ public class DatabaseUnitTests {
             gdao = new SQLGameDAO();
 
             user = new UserData("user", "password", "email");
-            badUser = new UserData(null, "password", "email");
         }
         catch (Exception e){
             System.out.println("There was an error initializing the testing.");
             System.out.println(e.getMessage());
         }
     }
-
-//    @BeforeEach
-//    public void init() {
-//        try {
-//            user = new UserData("user", "password", "email");
-//            badUser = new UserData(null, "password", "email");
-//        }
-//        catch (Exception e){
-//            System.out.println("There was an error:");
-//            System.out.println(e.getMessage());
-//        }
-//    }
 
     @AfterEach
     public void del() {
@@ -92,27 +62,26 @@ public class DatabaseUnitTests {
 
     @Test
     @Order(2)
-    @DisplayName("RegisterGoodTest")
+    @DisplayName("Create Game Good")
     public void registerTest() {
         try{
-            AuthData authData = userService.register(user);
-            AuthData newAuthData = authService.verify(authData.authToken());
-            Assertions.assertEquals(newAuthData, authData);
+            int testID = gdao.createGame("New Game");
+            Assertions.assertEquals(1, testID);
         }
         catch (DataAccessException e){
-            System.out.println("Registering doesn't work");
+            System.out.println("Creating a game throws an error");
             Assertions.fail();
         }
     }
 
     @Test
     @Order(3)
-    @DisplayName("Register Bad Test")
+    @DisplayName("Create Game Bad")
     public void registerBadTest() {
         try{
-            userService.register(badUser);
-            System.out.println("Doesn't work");
-            Assertions.fail();
+            int testID = gdao.createGame(null);
+            System.out.println("Creating a game with a null name shouldn't work");
+            Assertions.assertNotEquals(1, testID);
         }
         catch (DataAccessException e){
             Assertions.assertTrue(true);
@@ -121,59 +90,58 @@ public class DatabaseUnitTests {
 
     @Test
     @Order(4)
-    @DisplayName("Login Good Test")
-    public void loginTest() {
+    @DisplayName("Get Game Good")
+    public void getGameGood() {
         try{
-            AuthData authData = userService.register(user);
-            userService.logout(authData.authToken());
-            AuthData newAuthData = userService.login(user);
-            Assertions.assertNotEquals(newAuthData.authToken(), null);
+            int testID = gdao.createGame("New Game");
+            GameData gdata = gdao.getGame(testID);
+            assert(gdata != null);
         }
         catch (DataAccessException e){
             System.out.println("Doesn't work");
-            Assertions.assertFalse(false);
+            Assertions.fail();
         }
     }
 
     @Test
     @Order(5)
-    @DisplayName("Login Bad Test")
-    public void loginBadTest() {
+    @DisplayName("Get Game bad")
+    public void getGameBad() {
         try{
-            AuthData authData = userService.register(badUser);
-            System.out.println("Doesn't work");
-            Assertions.fail();
+            int testID = gdao.createGame("New Game");
+            GameData gdata = gdao.getGame(2);
+            Assertions.assertNull(gdata);
         }
         catch (DataAccessException e){
-            Assertions.assertTrue(true);
+
+            Assertions.fail();
         }
     }
 
 
     @Test
     @Order(6)
-    @DisplayName("Logout Good Test")
-    public void logoutTest() {
+    @DisplayName("List Games good")
+    public void listGamesGood() {
         try{
-            AuthData authData = userService.register(user);
-            userService.logout(authData.authToken());
-            AuthData newAuthData = authService.verify(authData.authToken());
-            Assertions.assertNull(newAuthData);
+            int testID = gdao.createGame("New Game");
+            int otherID = gdao.createGame("Other Games");
+            HashMap<Integer, GameData> map = gdao.listGames();
+            Assertions.assertFalse(map.isEmpty());
+            Assertions.assertTrue(map.containsKey(otherID));
         }
         catch (DataAccessException e){
             System.out.println("Doesn't work");
-            Assertions.assertFalse(false);
+            Assertions.fail();
         }
     }
 
     @Test
-    @Order(7)
-    @DisplayName("Logout Bad Test")
-    public void logoutBadTest() {
+    @DisplayName("List Games bad")
+    public void listGamesBad() {
         try{
-            AuthData authData = userService.register(user);
-            boolean success = userService.logout("badAuthToken");
-            Assertions.assertFalse(success);
+            HashMap<Integer, GameData> map = gdao.listGames();
+            Assertions.assertTrue(map.isEmpty());
         }
         catch (DataAccessException e){
             System.out.println("Doesn't work");
@@ -183,106 +151,216 @@ public class DatabaseUnitTests {
 
     @Test
     @Order(8)
-    @DisplayName("List a Game")
-    public void listGame() {
-        AuthData aData = authService.add(user.username());
-
+    @DisplayName("Update Game Good")
+    public void updateGame() {
         try{
-            gameService.createGame(aData.authToken(), "New Game");
-            HashMap<Integer, GameData> games = gameService.listGames(aData.authToken());
-            Assertions.assertInstanceOf(GameData.class, games.get(1));
+            int testID = gdao.createGame("New Game");
+            GameData gData = gdao.getGame(testID);
+            GameData newGData = new GameData(testID, "username", "username2", "New Game", gData.game());
+            gdao.updateGame(newGData);
+            GameData finalGData = gdao.getGame(testID);
+            Assertions.assertNotEquals(gData, finalGData);
         }
         catch (DataAccessException e){
             System.out.println("Doesn't work");
-            Assertions.assertFalse(false);
+            Assertions.fail();
         }
+    }
 
+    @Test
+    @Order(8)
+    @DisplayName("Update Game Bad")
+    public void updateGameBad() {
+        try{
+            int testID = gdao.createGame("New Game");
+            GameData gData = gdao.getGame(testID);
+            GameData newGData = new GameData(1, "username", "username2", "Other Game", gData.game());
+            gdao.updateGame(newGData);
+            GameData finalGData = gdao.getGame(testID);
+            Assertions.assertNotEquals(gData, finalGData);
+        }
+        catch (DataAccessException e){
+            Assertions.assertTrue(true);
+        }
     }
 
     @Test
     @Order(9)
-    @DisplayName("List Game, bad token")
-    public void listGameUnauthorized() {
-        AuthData aData = authService.add(user.username());
-
+    @DisplayName("addAuthTest")
+    public void addAuthTest() {
         try{
-            gameService.createGame("badAuthToken", "New Game");
-            HashMap<Integer, GameData> games = gameService.listGames(aData.authToken());
-            Assertions.assertFalse(games.isEmpty());
+            AuthData aData = adao.addAuth(user.username());
+            Assertions.assertTrue(aData != null && aData.authToken() != null);
         }
         catch (DataAccessException e){
             System.out.println("Doesn't work");
-            Assertions.assertFalse(false);
+            Assertions.fail();
+        }
+    }
+
+    @Test
+    @Order(9)
+    @DisplayName("addAuthTestBad")
+    public void addAuthTestBad() {
+        try{
+            AuthData aData = adao.addAuth(null);
+            Assertions.fail();
+        }
+        catch (Exception e){
+            System.out.println("Doesn't work");
+            Assertions.assertTrue(true);
+        }
+    }
+
+    @Test
+    @Order(10)
+    @DisplayName("getAuthTest")
+    public void getAuthTest() {
+        try{
+            AuthData aData = adao.addAuth(user.username());
+            AuthData sameData = adao.getAuth(aData.authToken());
+            Assertions.assertEquals(aData, sameData);
+        }
+        catch (DataAccessException e){
+            System.out.println("Doesn't work");
+            Assertions.fail();
         }
     }
 
 
     @Test
     @Order(10)
-    @DisplayName("Create a Game")
-    public void addGame() {
-        AuthData aData = authService.add(user.username());
-
+    @DisplayName("getAuthTestBad")
+    public void getAuthTestBad() {
         try{
-            gameService.createGame(aData.authToken(), "New Game");
-            HashMap<Integer, GameData> games = gameService.listGames(aData.authToken());
-            Assertions.assertFalse(games.isEmpty());
+            AuthData aData = adao.addAuth(user.username());
+            AuthData sameData = adao.getAuth("bad authToken");
+            Assertions.assertNull(sameData);
         }
         catch (DataAccessException e){
-            System.out.println("Doesn't work");
-            Assertions.assertFalse(false);
+            System.out.println("Bad authToken not in database");
+            Assertions.assertTrue(true);
         }
-
     }
 
     @Test
     @Order(11)
-    @DisplayName("Create a Game with a bad Token")
-    public void addGameUnauthorized() {
+    @DisplayName("deleteAuthTest")
+    public void deleteAuthTest() {
         try{
-            gameService.createGame(null, "New Game");
-            System.out.println("Shouldn't work");
-            Assertions.fail();
+            AuthData aData = adao.addAuth(user.username());
+            Assertions.assertTrue(adao.deleteAuth(aData.authToken()));
         }
         catch (DataAccessException e){
-            Assertions.assertTrue(true);
+            System.out.println("Doesn't work");
+            Assertions.fail();
+        }
+    }
+
+    @Test
+    @Order(11)
+    @DisplayName("deleteAuthTest")
+    public void deleteAuthTestBad() {
+        try{
+            AuthData aData = adao.addAuth(user.username());
+            Assertions.assertFalse(adao.deleteAuth("bad authToken"));
+            adao.deleteAuth(aData.authToken());
+            Assertions.assertFalse(adao.deleteAuth(aData.authToken()));
+        }
+        catch (DataAccessException e){
+            System.out.println("Doesn't work");
+            Assertions.fail();
         }
     }
 
     @Test
     @Order(12)
-    @DisplayName("Join a Game")
-    public void joinGame() {
-        AuthData aData = authService.add(user.username());
-
+    @DisplayName("createUserTest")
+    public void createUserTest() {
         try{
-            gameService.createGame(aData.authToken(), "New Game");
-            GameData game = gameService.joinGame(aData.authToken(), new JoinGameData(ChessGame.TeamColor.WHITE, 1));
-            Assertions.assertNotNull(game.whiteUsername());
+            udao.createUser(user);
+            UserData uData = udao.getUser(user.username());
+            Assertions.assertNotNull(uData);
         }
         catch (DataAccessException e){
             System.out.println("Doesn't work");
             Assertions.fail();
         }
-
     }
 
     @Test
-    @Order(13)
-    @DisplayName("Join a Game via stealing")
-    public void joinGameIllegally() {
-        AuthData aData = authService.add(user.username());
-
+    @Order(12)
+    @DisplayName("createUserTestBad")
+    public void createUserTestBad() {
         try{
-            gameService.createGame(aData.authToken(), "New Game");
-            gameService.joinGame(aData.authToken(), new JoinGameData(ChessGame.TeamColor.WHITE, 1));
-            gameService.joinGame(aData.authToken(), new JoinGameData(ChessGame.TeamColor.WHITE, 1));
+            udao.createUser(new UserData(null, user.password(), "email"));
             System.out.println("Doesn't work");
-            Assertions.assertFalse(false);
+            Assertions.fail();
         }
         catch (DataAccessException e){
             Assertions.assertTrue(true);
         }
+    }
 
+    @Test
+    @Order(13)
+    @DisplayName("getUserTest")
+    public void getUserTest() {
+        try{
+            udao.createUser(user);
+            UserData uData = udao.getUser(user.username());
+            Assertions.assertNotNull(uData);
+        }
+        catch (DataAccessException e){
+            System.out.println("Doesn't work");
+            Assertions.fail();
+        }
+    }
+
+    @Test
+    @Order(13)
+    @DisplayName("getUserTestBad")
+    public void getUserTestBad() {
+        try{
+            udao.clear();
+            UserData uData = udao.getUser(user.username());
+            Assertions.assertNull(uData);
+        }
+        catch (DataAccessException e){
+            System.out.println("Doesn't work");
+            Assertions.fail();
+        }
+    }
+
+    @Test
+    @Order(14)
+    @DisplayName("getPasswordTest")
+    public void getPasswordTest() {
+        try{
+            udao.createUser(user);
+            String pass = udao.getPassword(user.username());
+            Assertions.assertTrue(pass != null && !Objects.equals(pass, "password"));
+        }
+        catch (DataAccessException e){
+            System.out.println("Doesn't work");
+            Assertions.fail();
+        }
+    }
+
+
+    @Test
+    @Order(14)
+    @DisplayName("getPasswordTestBad")
+    public void getPasswordTestBad() {
+        try{
+            udao.createUser(new UserData(null, user.password(), "email"));
+            String pass = udao.getPassword(user.username());
+            Assertions.assertTrue(pass != null && !Objects.equals(pass, "password"));
+            System.out.println("Doesn't work");
+            Assertions.fail();
+        }
+        catch (DataAccessException e){
+            Assertions.assertTrue(true);
+        }
     }
 }
