@@ -4,7 +4,7 @@ import dataaccess.*;
 
 import model.AuthData;
 import model.UserData;
-import utils.encrypt;
+import utils.Encrypt;
 
 import java.util.Objects;
 
@@ -45,7 +45,7 @@ public class UserService {
         if(udao.getUser(user.username()) == null){
             return new AuthData(null, user.username());
         }
-        if(!encrypt.compareHash(user.password(), udao.getPassword(user.username()))){
+        if(!Encrypt.compareHash(user.password(), udao.getPassword(user.username()))){
             return new AuthData(null, user.username());
         }
         if(udao.getUser(user.username()) != null){

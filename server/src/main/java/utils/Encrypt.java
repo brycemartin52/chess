@@ -2,7 +2,7 @@ package utils;
 
 import org.mindrot.jbcrypt.BCrypt;
 
-public class encrypt {
+public class Encrypt {
     public static String getHash(String string){
         return BCrypt.hashpw(string, BCrypt.gensalt());
     }

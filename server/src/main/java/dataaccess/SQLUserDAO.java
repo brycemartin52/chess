@@ -1,7 +1,7 @@
 package dataaccess;
 
 import model.UserData;
-import utils.encrypt;
+import utils.Encrypt;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -17,7 +17,7 @@ public class SQLUserDAO implements UserDAOInterface{
     @Override
     public void createUser(UserData dat) throws DataAccessException {
         var statement = "INSERT INTO userData (username, password, email) VALUES (?, ?, ?);";
-        String passwordHash = encrypt.getHash(dat.password());
+        String passwordHash = Encrypt.getHash(dat.password());
         executeUpdate(statement, dat.username(), passwordHash, dat.email());
     }
 
