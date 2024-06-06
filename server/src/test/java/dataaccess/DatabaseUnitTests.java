@@ -3,6 +3,7 @@ import model.AuthData;
 import model.GameData;
 import model.UserData;
 import org.junit.jupiter.api.*;
+import utils.Encrypt;
 
 import java.util.HashMap;
 import java.util.Objects;
@@ -281,6 +282,7 @@ public class DatabaseUnitTests {
             udao.createUser(user);
             UserData uData = udao.getUser(user.username());
             Assertions.assertNotNull(uData);
+            Assertions.assertEquals("user", uData.username());
         }
         catch (DataAccessException e){
             System.out.println("Doesn't work");
@@ -310,6 +312,7 @@ public class DatabaseUnitTests {
             udao.createUser(user);
             UserData uData = udao.getUser(user.username());
             Assertions.assertNotNull(uData);
+            Assertions.assertNotEquals(uData.password(), "password");
         }
         catch (DataAccessException e){
             System.out.println("Doesn't work");

@@ -5,9 +5,6 @@ import model.AuthData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import static java.sql.Statement.RETURN_GENERATED_KEYS;
-import static java.sql.Types.NULL;
-
 public class SQLAuthDAO implements AuthDAOInterface{
 
     public SQLAuthDAO() throws DataAccessException {
@@ -27,7 +24,7 @@ public class SQLAuthDAO implements AuthDAOInterface{
     public AuthData addAuth(String username) throws DataAccessException {
         String authToken = createAuth(username);
         var newstatement = "INSERT INTO authData (username, authToken) VALUES (?, ?);";
-        executeUpdate(newstatement, username, authToken);
+        SharedSQLMethods.executeUpdate(newstatement, username, authToken);
         return new AuthData(authToken, username);
     }
 
@@ -62,30 +59,13 @@ public class SQLAuthDAO implements AuthDAOInterface{
             return false;
         }
         var statement = "DELETE FROM authData where authToken = ?;";
-        executeUpdate(statement, authToken);
+        SharedSQLMethods.executeUpdate(statement, authToken);
         return true;
     }
 
     @Override
     public void clear() throws DataAccessException {
         var statement = "TRUNCATE authData;";
-        executeUpdate(statement);
+        SharedSQLMethods.executeUpdate(statement);
     }
-
-    private void executeUpdate(String statement, Object... params) throws DataAccessException {
-        try (var conn = DatabaseManager.getConnection()) {
-            try (var ps = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
-                for (var i = 0; i < params.length; i++) {
-                    var param = params[i];
-                    if (param instanceof String p) ps.setString(i + 1, p);
-                    else if (param == null) ps.setNull(i + 1, NULL);
-                }
-                ps.executeUpdate();
-            }
-        }
-        catch (SQLException e) {
-            throw new DataAccessException(String.format("unable to update database: %s, %s", statement, e.getMessage()));
-        }
-    }
-
 }
