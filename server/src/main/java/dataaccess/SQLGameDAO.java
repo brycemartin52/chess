@@ -14,7 +14,20 @@ public class SQLGameDAO implements GameDAOInterface {
     GsonSerializer gSerializer;
 
     public SQLGameDAO() throws DataAccessException {
-        configureDatabase();
+        String[] createStatements = {
+                """
+            CREATE TABLE IF NOT EXISTS gameData (
+              `gameID` int NOT NULL AUTO_INCREMENT,
+              `whiteUsername` varchar(128) NULL,
+              `blackUsername` varchar(128) NULL,
+              `gameName` varchar(128) NOT NULL,
+              `game` longtext NOT NULL,
+              PRIMARY KEY (`gameID`),
+              INDEX(gameName)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+            """
+        };
+        SharedSQLMethods.configureDatabase(createStatements);
         gSerializer = new GsonSerializer();
     }
 
@@ -110,30 +123,4 @@ public class SQLGameDAO implements GameDAOInterface {
         }
     }
 
-    private final String[] createStatements = {
-            """
-            CREATE TABLE IF NOT EXISTS gameData (
-              `gameID` int NOT NULL AUTO_INCREMENT,
-              `whiteUsername` varchar(128) NULL,
-              `blackUsername` varchar(128) NULL,
-              `gameName` varchar(128) NOT NULL,
-              `game` longtext NOT NULL,
-              PRIMARY KEY (`gameID`),
-              INDEX(gameName)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
-            """
-    };
-
-    private void configureDatabase() throws DataAccessException {
-        DatabaseManager.createDatabase();
-        try (var conn = DatabaseManager.getConnection()) {
-            for (var statement : createStatements) {
-                try (var preparedStatement = conn.prepareStatement(statement)) {
-                    preparedStatement.executeUpdate();
-                }
-            }
-        } catch (SQLException ex) {
-            throw new DataAccessException(String.format("Unable to configure database: %s", ex.getMessage()));
-        }
-    }
 }

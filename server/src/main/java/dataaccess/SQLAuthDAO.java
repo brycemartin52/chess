@@ -11,7 +11,16 @@ import static java.sql.Types.NULL;
 public class SQLAuthDAO implements AuthDAOInterface{
 
     public SQLAuthDAO() throws DataAccessException {
-        configureDatabase();
+        String[] createStatements = {
+                """
+            CREATE TABLE IF NOT EXISTS authData (
+              `username` varchar(128) NOT NULL,
+              `authToken` varchar(72) NOT NULL,
+              PRIMARY KEY (`authToken`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
+            """
+        };
+        SharedSQLMethods.configureDatabase(createStatements);
     }
 
     @Override
@@ -79,26 +88,4 @@ public class SQLAuthDAO implements AuthDAOInterface{
         }
     }
 
-    private final String[] createStatements = {
-            """
-            CREATE TABLE IF NOT EXISTS authData (
-              `username` varchar(128) NOT NULL,
-              `authToken` varchar(72) NOT NULL,
-              PRIMARY KEY (`authToken`)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
-            """
-    };
-
-    private void configureDatabase() throws DataAccessException {
-        DatabaseManager.createDatabase();
-        try (var conn = DatabaseManager.getConnection()) {
-            for (var statement : createStatements) {
-                try (var preparedStatement = conn.prepareStatement(statement)) {
-                    preparedStatement.executeUpdate();
-                }
-            }
-        } catch (SQLException ex) {
-            throw new DataAccessException(String.format("Unable to configure database: %s", ex.getMessage()));
-        }
-    }
 }
