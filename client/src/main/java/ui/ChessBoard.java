@@ -1,6 +1,7 @@
 package ui;
 
 import chess.ChessGame;
+import chess.ChessMove;
 import chess.ChessPiece;
 import chess.ChessPosition;
 
@@ -29,15 +30,23 @@ public class ChessBoard {
 
     public static void main(String[] args) {
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
-        board.resetBoard();
-        perspective = ChessGame.TeamColor.BLACK;
+        ChessGame game = new ChessGame();
+        game.doMove(new ChessMove(new ChessPosition(2, 4), new ChessPosition(4, 4)));
+        board = game.getBoard();
 
         out.print(ERASE_SCREEN);
 
+        perspective = ChessGame.TeamColor.WHITE;
+        drawHeaders(out);
+        drawTicTacToeBoard(out);
         drawHeaders(out);
 
-        drawTicTacToeBoard(out);
+        out.print(SET_BG_COLOR_BLACK);
+        out.println();
 
+        perspective = ChessGame.TeamColor.BLACK;
+        drawHeaders(out);
+        drawTicTacToeBoard(out);
         drawHeaders(out);
 
         out.print(SET_BG_COLOR_BLACK);
