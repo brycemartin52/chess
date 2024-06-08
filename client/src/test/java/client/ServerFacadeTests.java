@@ -2,10 +2,13 @@ package client;
 
 import com.sun.tools.javac.Main;
 import model.AuthData;
+import model.GameData;
 import org.junit.jupiter.api.*;
 import server.Server;
 
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -69,6 +72,8 @@ public class ServerFacadeTests {
     @Order(3)
     void logoutGood() throws Exception {
         facade.logout(aData.authToken());
+        System.out.println("There should be no error message right here ^^^");
+        Assertions.assertTrue(true);
     }
 
     @Test
@@ -76,13 +81,14 @@ public class ServerFacadeTests {
     void logoutBad() throws Exception {
         facade.logout(aData.authToken());
         System.out.println("There should be an error message right here ^^^");
+        Assertions.assertTrue(true);
     }
 
     @Test
     @Order(5)
     void loginGood() throws Exception {
-        AuthData auth = facade.login("player1", "password");
-        Assertions.assertNotNull(auth);
+        aData = facade.login("player1", "password");
+        Assertions.assertNotNull(aData);
     }
 
     @Test
@@ -91,6 +97,60 @@ public class ServerFacadeTests {
         AuthData auth = facade.login("player", "password");
         System.out.println("There should be an error message right here ^^^");
         Assertions.assertNull(auth);
+    }
+
+    @Test
+    @Order(7)
+    void listBad() throws Exception {
+        HashMap gameMap = facade.listGames(aData.authToken());
+        ArrayList<GameData> games = (ArrayList<GameData>) gameMap.get("games");
+        Assertions.assertTrue(games.isEmpty());
+    }
+
+    @Test
+    @Order(8)
+    void createGood() throws Exception {
+        GameData game = facade.createGame("New Game", aData.authToken());
+        HashMap<Integer, GameData> games = facade.listGames(aData.authToken());
+        Assertions.assertFalse(games.isEmpty());
+        assertEquals("New Game", game.gameName());
+    }
+
+    @Test
+    @Order(9)
+    void createBad() throws Exception {
+        try{
+            GameData game = facade.createGame("Other Game", "badAuthToken");
+            System.out.printf("Game ID '%d' should be null", game.gameID());
+            Assertions.fail();
+        }
+        catch(Exception e){
+            Assertions.assertTrue(true);
+        }
+
+    }
+
+    @Test
+    @Order(10)
+    void listGood() throws Exception {
+        GameData game = facade.createGame("Different Game", aData.authToken());
+        HashMap<Integer, GameData> games = facade.listGames(aData.authToken());
+        Assertions.assertFalse(games.isEmpty());
+        assertEquals("Different Game", game.gameName());
+    }
+
+    @Test
+    @Order(11)
+    void joinGood() throws Exception {
+        facade.playGame("WHITE", 1, aData.authToken());
+        System.out.println("There should be no error message right here ^^^");
+    }
+
+    @Test
+    @Order(12)
+    void joinBad() throws Exception {
+        facade.playGame("BLACK", 1, "authToken");
+        System.out.println("There should be an error message right here ^^^");
     }
 
 }

@@ -30,11 +30,12 @@ public class ServerFacade {
         return makeRequest("POST", "/user", user, AuthData.class, null);
     }
 
-    public void createGame(String gameName, String authToken) {
-        makeRequest("POST", "/game", gameName, Integer.class, authToken);
+    public GameData createGame(String gameName, String authToken) {
+        GameData game = new GameData(0, null, null, gameName, null);
+        return makeRequest("POST", "/game", game, GameData.class, authToken);
     }
 
-    public HashMap<Integer, GameData> listGames(String authToken) {
+    public HashMap listGames(String authToken) {
         return makeRequest("GET", "/game", null, HashMap.class, authToken);
     }
 
