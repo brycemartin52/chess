@@ -48,10 +48,8 @@ public class UserService {
         if(!Encrypt.compareHash(user.password(), udao.getPassword(user.username()))){
             return new AuthData(null, user.username());
         }
-//        var stuff = adao.getAuth(user);
-//        if(stuff != null){
-//            return new AuthData(null, user.username());
-//        }
+
+//        if(adao.getAuth(user) != null){return new AuthData(null, user.username());}
         return adao.addAuth(user.username());
     }
 

@@ -24,10 +24,6 @@ public class ServerFacadeTests {
     private static AuthData aData;
     private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
 
-//    @BeforeEach
-//    public void setup(){
-//        server.clear();
-//    }
 
     @BeforeAll
     public static void init() {
