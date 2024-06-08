@@ -1,6 +1,7 @@
 package dataaccess;
 
 import model.AuthData;
+import model.UserData;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -40,6 +41,24 @@ public class SQLAuthDAO implements AuthDAOInterface{
             var statement = "SELECT username, authToken FROM authData WHERE authToken=?;";
             try (var ps = conn.prepareStatement(statement)) {
                 ps.setString(1, authToken);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        return readAuth(rs);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new DataAccessException(String.format("Unable to read data: %s", e.getMessage()));
+        }
+        return null;
+    }
+
+    public AuthData getAuth(UserData user) throws DataAccessException {
+        String username = user.username();
+        try (var conn = DatabaseManager.getConnection()) {
+            var statement = "SELECT username, authToken FROM authData WHERE username=?;";
+            try (var ps = conn.prepareStatement(statement)) {
+                ps.setString(1, username);
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
                         return readAuth(rs);

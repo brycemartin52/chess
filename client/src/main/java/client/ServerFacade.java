@@ -70,7 +70,7 @@ public class ServerFacade {
             return readBody(connection, responseClass);
         }
         catch(Exception e){
-            System.out.printf("Something went wrong with your make request: %s%n", e.getMessage());
+            System.out.printf("Error: %s%n", e.getMessage());
             return null;
         }
     }
