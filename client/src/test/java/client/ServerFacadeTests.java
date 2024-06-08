@@ -8,6 +8,11 @@ public class ServerFacadeTests {
 
     private static Server server;
 
+//    @BeforeEach
+//    public void setup(){
+//        server.clear();
+//    }
+
     @BeforeAll
     public static void init() {
         server = new Server();
