@@ -10,28 +10,24 @@ import model.UserData;
 
 import java.io.*;
 import java.net.*;
-import java.util.Collection;
 import java.util.HashMap;
 
 public class ServerFacade {
     private final String serverUrl;
-    private final Gson serializer;
+
 
     public ServerFacade(String url) {
         serverUrl = url;
-        serializer = new Gson();
     }
 
-    public void login(String username, String password) {
+    public AuthData login(String username, String password) {
         UserData user = new UserData(username, password, null);
-        String userData = serializer.toJson(user);
-        makeRequest("POST", "/session", userData, AuthData.class);
+        return makeRequest("POST", "/session", user, AuthData.class);
     }
 
-    public void register(String username, String password, String email) {
+    public AuthData register(String username, String password, String email) {
         UserData user = new UserData(username, password, email);
-        String userData = serializer.toJson(user);
-        makeRequest("POST", "/user", userData, AuthData.class);
+        return makeRequest("POST", "/user", user, AuthData.class);
     }
 
     public void createGame(String gameName) {
@@ -60,6 +56,7 @@ public class ServerFacade {
             connection.setRequestMethod(requestMethod);
 
             if(request != null){
+                connection.setDoOutput(true);
                 writeBody(request, connection);
             }
             connection.connect();

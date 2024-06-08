@@ -2,11 +2,9 @@ package client;
 
 import java.util.Arrays;
 
-import chess.ChessGame;
 import com.google.gson.Gson;
-//import model.Pet;
-//import model.PetType;
 import exception.ResponseException;
+import ui.ChessBoard;
 //import client.websocket.NotificationHandler;
 //import client.websocket.WebSocketFacade;
 
@@ -14,7 +12,8 @@ public class ChessClient {
     private String username = null;
     private final ServerFacade server;
     private final String serverUrl;
-    boolean loggedIn;
+    private boolean loggedIn;
+
 //    private final NotificationHandler notificationHandler;
 //    private WebSocketFacade ws;
 
@@ -53,7 +52,7 @@ public class ChessClient {
                     case "New", "N" -> createGame(params);
                     case "All", "A" -> listGames();
                     case "Play", "P" -> playGame();
-                    case "Watch", "W" -> "Watch an epic showdown";
+                    case "Watch", "W" -> watchGame(params);
                     case "Help", "H" -> help();
                     case "Logout", "O" -> logout();
                     default -> "Unknown command";
@@ -133,7 +132,7 @@ public class ChessClient {
             server.createGame(gameName);
             return "Let's get ready to rumble!";
         }
-        throw new ResponseException(400, "Expected: (C)reate <*Name of the game*>");
+        throw new ResponseException(400, "Expected: (C)reate <Name_of_the_game>");
     }
 
     public String playGame(Object... params) throws ResponseException {
@@ -144,6 +143,19 @@ public class ChessClient {
 //            ws = new WebSocketFacade(serverUrl, notificationHandler);
 //            ws.enterPetShop(username);
             server.playGame(team, gameID);
+            ChessBoard.main(new String[0]);
+            return "Let's get ready to rumble!";
+        }
+        throw new ResponseException(400, "Expected: (P)lay <WHITE or BLACK> <gameID>");
+    }
+
+    public String watchGame(Object... params) throws ResponseException {
+        assertSignedIn();
+        if (params.length >= 1) {
+            int gameID = (int) params[0];
+//            ws = new WebSocketFacade(serverUrl, notificationHandler);
+//            ws.enterPetShop(username);
+            ChessBoard.main(new String[0]);
             return "Let's get ready to rumble!";
         }
         throw new ResponseException(400, "Expected: (P)lay <WHITE or BLACK> <gameID>");

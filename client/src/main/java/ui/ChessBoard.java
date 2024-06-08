@@ -23,7 +23,6 @@ public class ChessBoard {
     private static final String ROOK = BLACK_ROOK;
     private static final String QUEEN = BLACK_QUEEN;
     private static final String KING = BLACK_KING;
-    private static Random rand = new Random();
     private static chess.ChessBoard board = new chess.ChessBoard();
     private static ChessGame.TeamColor perspective;
 
