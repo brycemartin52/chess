@@ -36,7 +36,7 @@ public class ChessClient {
         else{
             System.out.println("(N)ew Game <Game Name>");
             System.out.println("(A)ll Games");
-            System.out.println("(P)lay Game <Game ID>");
+            System.out.println("(P)lay Game <WHITE/BLACK> <Game ID>");
             System.out.println("(W)atch Game <Game ID>");
             System.out.println("(H)elp");
             System.out.println("Log(O)ut");
@@ -50,8 +50,9 @@ public class ChessClient {
             var params = Arrays.copyOfRange(tokens, 1, tokens.length);
             if(loggedIn) {
                 return switch (cmd) {
+                    case "New", "N" -> createGame(params);
                     case "All", "A" -> listGames();
-                    case "Play", "P" -> "It's about to get crazy";
+                    case "Play", "P" -> playGame();
                     case "Watch", "W" -> "Watch an epic showdown";
                     case "Help", "H" -> help();
                     case "Logout", "O" -> logout();
@@ -60,7 +61,7 @@ public class ChessClient {
             }
             else{
                 return switch (cmd) {
-                    case "Register", "R" -> "Sign up to play Chess";
+                    case "Register", "R" -> register(params);
                     case "Login", "L" -> login(params);
                     case "Help", "H" -> help();
                     case "Quit", "Q" -> "Quit";
@@ -72,7 +73,7 @@ public class ChessClient {
         }
     }
 
-    public String Register(String... params) throws ResponseException {
+    public String register(String... params) throws ResponseException {
         if (params.length >= 3) {
             username = params[0];
             String password = params[1];
@@ -80,7 +81,6 @@ public class ChessClient {
             if (!email.contains("@")) {
                 throw new ResponseException(400, "Must be a valid email");
             }
-
 //            ws = new WebSocketFacade(serverUrl, notificationHandler);
 //            ws.enterPetShop(username);
             server.register(username, password, email);
@@ -103,72 +103,51 @@ public class ChessClient {
         throw new ResponseException(400, "Expected: (L)ogin <username> <password>");
     }
 
-//    public String rescuePet(String... params) throws ResponseException {
-//        assertSignedIn();
-//        if (params.length >= 2) {
-//            var name = params[0];
-//            var type = PetType.valueOf(params[1].toUpperCase());
-//            var pet = new Pet(0, name, type);
-//            pet = server.addPet(pet);
-//            return String.format("You rescued %s. Assigned ID: %d", pet.name(), pet.id());
-//        }
-//        throw new ResponseException(400, "Expected: <name> <CAT|DOG|FROG>");
-//    }
+    public String logout() throws ResponseException {
+        assertSignedIn();
+//        ws.leavePetShop(visitorName);
+//        ws = null;
+        server.logout();
+        loggedIn = false;
+        return String.format("See you next time, %s.", username);
+    }
+
 
     public String listGames() throws ResponseException {
         assertSignedIn();
         var games = server.listGames();
         var result = new StringBuilder();
         var gson = new Gson();
-        for (var game : games) {
+        for (var game : games.values()) {
             result.append(gson.toJson(game)).append('\n');
         }
         return result.toString();
     }
 
-//    public String adoptPet(String... params) throws ResponseException {
-//        assertSignedIn();
-//        if (params.length == 1) {
-//            try {
-//                var id = Integer.parseInt(params[0]);
-//                var pet = getPet(id);
-//                if (pet != null) {
-//                    server.deletePet(id);
-//                    return String.format("%s says %s", pet.name(), pet.sound());
-//                }
-//            } catch (NumberFormatException ignored) {
-//            }
-//        }
-//        throw new ResponseException(400, "Expected: <pet id>");
-//    }
-//
-//    public String adoptAllPets() throws ResponseException {
-//        assertSignedIn();
-//        var buffer = new StringBuilder();
-//        for (var pet : server.listPets()) {
-//            buffer.append(String.format("%s says %s%n", pet.name(), pet.sound()));
-//        }
-//
-//        server.deleteAllPets();
-//        return buffer.toString();
-//    }
-
-    public String logout() throws ResponseException {
+    public String createGame(String... params) throws ResponseException {
         assertSignedIn();
-//        ws.leavePetShop(visitorName);
-//        ws = null;
-        loggedIn = false;
-        return String.format("%s left the shop", username);
+        if (params.length >= 1) {
+            String gameName = params[0];
+//            ws = new WebSocketFacade(serverUrl, notificationHandler);
+//            ws.enterPetShop(username);
+            server.createGame(gameName);
+            return "Let's get ready to rumble!";
+        }
+        throw new ResponseException(400, "Expected: (C)reate <*Name of the game*>");
     }
 
-//    private ChessGame getGame(int id) throws ResponseException {
-//        for (var game : server.listGames()) {
-//            if (game.gameid() == id) {
-//                return game;
-//            }
-//        }
-//        return null;
-//    }
+    public String playGame(Object... params) throws ResponseException {
+        assertSignedIn();
+        if (params.length >= 2) {
+            String team = (String) params[0];
+            int gameID = (int) params[1];
+//            ws = new WebSocketFacade(serverUrl, notificationHandler);
+//            ws.enterPetShop(username);
+            server.playGame(team, gameID);
+            return "Let's get ready to rumble!";
+        }
+        throw new ResponseException(400, "Expected: (P)lay <WHITE or BLACK> <gameID>");
+    }
 
     public String help() {
         if (!loggedIn) {
