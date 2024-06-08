@@ -4,12 +4,14 @@ import java.util.Arrays;
 
 import com.google.gson.Gson;
 import exception.ResponseException;
+import model.AuthData;
 import ui.ChessBoard;
 //import client.websocket.NotificationHandler;
 //import client.websocket.WebSocketFacade;
 
 public class ChessClient {
-    private String username = null;
+    private String username;
+    private String authToken;
     private final ServerFacade server;
     private final String serverUrl;
     private boolean loggedIn;
@@ -21,6 +23,8 @@ public class ChessClient {
         server = new ServerFacade(serverUrl);
         this.serverUrl = serverUrl;
         loggedIn = false;
+        username = null;
+        authToken = null;
 //        this.notificationHandler = notificationHandler;
     }
 
@@ -33,10 +37,10 @@ public class ChessClient {
         }
 
         else{
-            System.out.println("(N)ew Game <Game Name>");
-            System.out.println("(A)ll Games");
-            System.out.println("(P)lay Game <WHITE/BLACK> <Game ID>");
-            System.out.println("(W)atch Game <Game ID>");
+            System.out.println("(N)ew <Game Name>");
+            System.out.println("(A)ll");
+            System.out.println("(P)lay <WHITE/BLACK> <Game ID>");
+            System.out.println("(W)atch <Game ID>");
             System.out.println("(H)elp");
             System.out.println("Log(O)ut");
         }
@@ -78,11 +82,17 @@ public class ChessClient {
             String password = params[1];
             String email = params[2];
             if (!email.contains("@")) {
-                throw new ResponseException(400, "Must be a valid email");
+                return "Must be a valid email";
             }
 //            ws = new WebSocketFacade(serverUrl, notificationHandler);
 //            ws.enterPetShop(username);
-            server.register(username, password, email);
+            AuthData aData = server.register(username, password, email);
+            if(aData == null){
+                username = null;
+                return String.format("Sorry, but it looks like the username '%s' is already taken.", username);
+            }
+            username = aData.username();
+            authToken = aData.authToken();
             loggedIn = true;
             return String.format("Welcome %s!", username);
         }
@@ -95,7 +105,13 @@ public class ChessClient {
             String password = params[1];
 //            ws = new WebSocketFacade(serverUrl, notificationHandler);
 //            ws.enterPetShop(username);
-            server.login(username, password);
+            AuthData aData = server.login(username, password);
+            if(aData == null || aData.authToken() == null){
+                username = null;
+                return "Please enter a valid username and password";
+            }
+            username = aData.username();
+            authToken = aData.authToken();
             loggedIn = true;
             return String.format("Welcome %s!", username);
         }
@@ -106,7 +122,9 @@ public class ChessClient {
         assertSignedIn();
 //        ws.leavePetShop(visitorName);
 //        ws = null;
-        server.logout();
+        server.logout(authToken);
+        username = null;
+        authToken = null;
         loggedIn = false;
         return String.format("See you next time, %s.", username);
     }
@@ -114,7 +132,7 @@ public class ChessClient {
 
     public String listGames() throws ResponseException {
         assertSignedIn();
-        var games = server.listGames();
+        var games = server.listGames(authToken);
         var result = new StringBuilder();
         var gson = new Gson();
         for (var game : games.values()) {
@@ -129,7 +147,7 @@ public class ChessClient {
             String gameName = params[0];
 //            ws = new WebSocketFacade(serverUrl, notificationHandler);
 //            ws.enterPetShop(username);
-            server.createGame(gameName);
+            server.createGame(gameName, authToken);
             return "Let's get ready to rumble!";
         }
         throw new ResponseException(400, "Expected: (C)reate <Name_of_the_game>");
@@ -142,7 +160,7 @@ public class ChessClient {
             int gameID = (int) params[1];
 //            ws = new WebSocketFacade(serverUrl, notificationHandler);
 //            ws.enterPetShop(username);
-            server.playGame(team, gameID);
+            server.playGame(team, gameID, authToken);
             ChessBoard.main(new String[0]);
             return "Let's get ready to rumble!";
         }

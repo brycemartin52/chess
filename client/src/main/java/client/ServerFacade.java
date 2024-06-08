@@ -22,43 +22,49 @@ public class ServerFacade {
 
     public AuthData login(String username, String password) {
         UserData user = new UserData(username, password, null);
-        return makeRequest("POST", "/session", user, AuthData.class);
+        return makeRequest("POST", "/session", user, AuthData.class, null);
     }
 
     public AuthData register(String username, String password, String email) {
         UserData user = new UserData(username, password, email);
-        return makeRequest("POST", "/user", user, AuthData.class);
+        return makeRequest("POST", "/user", user, AuthData.class, null);
     }
 
-    public void createGame(String gameName) {
-        makeRequest("POST", "/game", gameName, Integer.class);
+    public void createGame(String gameName, String authToken) {
+        makeRequest("POST", "/game", gameName, Integer.class, authToken);
     }
 
-    public HashMap<Integer, GameData> listGames() {
-        return makeRequest("GET", "/game", null, HashMap.class);
+    public HashMap<Integer, GameData> listGames(String authToken) {
+        return makeRequest("GET", "/game", null, HashMap.class, authToken);
     }
 
-    public void playGame(String color, int gameID) {
+    public void playGame(String color, int gameID, String authToken) {
         ChessGame.TeamColor team = ChessGame.TeamColor.valueOf(color);
         JoinGameData data = new JoinGameData(team, gameID);
-        makeRequest("PUT", "/game", data, null);
+        makeRequest("PUT", "/game", data, null, authToken);
     }
 
-    public void logout() {
-        makeRequest("DELETE", "/session", null, null);
+    public void logout(String authToken) {
+        makeRequest("DELETE", "/session", null, null, authToken);
     }
 
-    public <T> T makeRequest(String requestMethod, String endpoint, Object request, Class<T> responseClass) {
+    public void clear() {
+        makeRequest("DELETE", "/db", null, null, null);
+    }
+
+    public <T> T makeRequest(String requestMethod, String endpoint, Object request, Class<T> responseClass, String header) {
         try{
             URL url = (new URI(serverUrl + endpoint)).toURL();
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setReadTimeout(5000);
             connection.setRequestMethod(requestMethod);
+            connection.addRequestProperty("authorization", header);
 
             if(request != null){
                 connection.setDoOutput(true);
                 writeBody(request, connection);
             }
+
             connection.connect();
             throwIfNotSuccessful(connection);
             return readBody(connection, responseClass);
