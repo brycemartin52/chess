@@ -37,8 +37,7 @@ public class ServerFacade {
         return makeRequest("GET", "/game", null, ListGames.class, authToken);
     }
 
-    public void playGame(String color, int gameID, String authToken) {
-        ChessGame.TeamColor team = ChessGame.TeamColor.valueOf(color);
+    public void playGame(ChessGame.TeamColor team, int gameID, String authToken) {
         JoinGameData data = new JoinGameData(team, gameID);
         makeRequest("PUT", "/game", data, null, authToken);
     }

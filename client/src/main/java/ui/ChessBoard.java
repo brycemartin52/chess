@@ -30,7 +30,6 @@ public class ChessBoard {
     public static void main(String[] args) {
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
         ChessGame game = new ChessGame();
-        game.doMove(new ChessMove(new ChessPosition(2, 4), new ChessPosition(4, 4)));
         board = game.getBoard();
 
         out.print(ERASE_SCREEN);

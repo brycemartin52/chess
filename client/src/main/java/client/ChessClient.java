@@ -2,6 +2,7 @@ package client;
 
 import java.util.*;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;
 import exception.ResponseException;
@@ -19,6 +20,7 @@ public class ChessClient {
     private final ServerFacade server;
     private final String serverUrl;
     private boolean loggedIn;
+    private boolean playingGame;
 
 //    private final NotificationHandler notificationHandler;
 //    private WebSocketFacade ws;
@@ -29,6 +31,7 @@ public class ChessClient {
         loggedIn = false;
         username = null;
         authToken = null;
+        playingGame = false;
 //        this.notificationHandler = notificationHandler;
     }
 
@@ -36,6 +39,12 @@ public class ChessClient {
         if(!loggedIn){
             System.out.println("(R)egister <username> <password> <email>");
             System.out.println("(L)ogin <username> <password>");
+            System.out.println("(H)elp");
+            System.out.println("(Q)uit");
+        }
+
+        if(playingGame){
+            System.out.println("(M)ake Move");
             System.out.println("(H)elp");
             System.out.println("(Q)uit");
         }
@@ -59,7 +68,7 @@ public class ChessClient {
                 return switch (cmd) {
                     case "new", "n" -> createGame(params);
                     case "all", "a" -> listGames();
-                    case "play", "p" -> playGame();
+                    case "play", "p" -> playGame(params);
                     case "watch", "w" -> watchGame(params);
                     case "help", "h" -> help();
                     case "logout", "o" -> logout();
@@ -145,7 +154,8 @@ public class ChessClient {
         var result = new StringBuilder();
         for (var game : games) {
             result.append(game.gameID()).append(": ").append(game.gameName()).append('\n');
-            result.append("White player: ").append(game.whiteUsername()).append("  ");
+            result.append("White player: ").append(game.whiteUsername()).append("\n");
+            result.append("Black player: ").append(game.blackUsername()).append("\n");
         }
         return result.toString();
     }
@@ -156,7 +166,7 @@ public class ChessClient {
             String gameName = params[0];
 //            ws = new WebSocketFacade(serverUrl, notificationHandler);
 //            ws.enterPetShop(username);
-            GameData gameData = server.createGame(gameName, authToken);
+           GameData game =  server.createGame(gameName, authToken);
             return "Game Created";
         }
         throw new ResponseException(400, "Expected: (C)reate <Name_of_the_game>");
@@ -165,13 +175,19 @@ public class ChessClient {
     public String playGame(Object... params) throws ResponseException {
         assertSignedIn();
         if (params.length >= 2) {
-            String team = (String) params[0];
-            int gameID = (int) params[1];
+            String color = (String) params[0];
+            int gameID = Integer.parseInt((String) params[1]);
+            ChessGame.TeamColor team = switch (color){
+                case "WHITE", "W", "w" -> ChessGame.TeamColor.WHITE;
+                case "BLACK", "B", "b" -> ChessGame.TeamColor.BLACK;
+                default -> throw new ResponseException(403, "Unexpected value: " + color);
+            };
 //            ws = new WebSocketFacade(serverUrl, notificationHandler);
 //            ws.enterPetShop(username);
             server.playGame(team, gameID, authToken);
             ChessBoard.main(new String[0]);
-            return "Let's get ready to rumble!";
+            playingGame = true;
+            return "Joined Game";
         }
         throw new ResponseException(400, "Expected: (P)lay <WHITE or BLACK> <gameID>");
     }
@@ -183,7 +199,8 @@ public class ChessClient {
 //            ws = new WebSocketFacade(serverUrl, notificationHandler);
 //            ws.enterPetShop(username);
             ChessBoard.main(new String[0]);
-            return "Let's get ready to rumble!";
+            playingGame = true;
+            return "Joined Game";
         }
         throw new ResponseException(400, "Expected: (P)lay <WHITE or BLACK> <gameID>");
     }

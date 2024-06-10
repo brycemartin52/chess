@@ -1,5 +1,6 @@
 package client;
 
+import chess.ChessGame;
 import com.sun.tools.javac.Main;
 import model.AuthData;
 import model.GameData;
@@ -99,8 +100,7 @@ public class ServerFacadeTests {
     @Test
     @Order(7)
     void listBad() throws Exception {
-        HashMap<String, HashSet<GameData>> gameMap = facade.listGames(aData.authToken());
-        HashSet<GameData> games = gameMap.get("games");
+        HashSet<GameData> games = facade.listGames(aData.authToken()).games();
         Assertions.assertTrue(games.isEmpty());
     }
 
@@ -108,7 +108,7 @@ public class ServerFacadeTests {
     @Order(8)
     void createGood() throws Exception {
         GameData game = facade.createGame("New Game", aData.authToken());
-        HashMap<String, HashSet<GameData>> games = facade.listGames(aData.authToken());
+        HashSet<GameData> games = facade.listGames(aData.authToken()).games();
         Assertions.assertFalse(games.isEmpty());
         assertEquals("New Game", game.gameName());
     }
@@ -131,7 +131,7 @@ public class ServerFacadeTests {
     @Order(10)
     void listGood() throws Exception {
         GameData game = facade.createGame("Different Game", aData.authToken());
-        HashMap<String, HashSet<GameData>> games = facade.listGames(aData.authToken());
+        HashSet<GameData> games = facade.listGames(aData.authToken()).games();
         Assertions.assertFalse(games.isEmpty());
         assertEquals("Different Game", game.gameName());
     }
@@ -139,14 +139,14 @@ public class ServerFacadeTests {
     @Test
     @Order(11)
     void joinGood() throws Exception {
-        facade.playGame("WHITE", 1, aData.authToken());
+        facade.playGame(ChessGame.TeamColor.WHITE, 1, aData.authToken());
         System.out.println("There should be no error message right here ^^^");
     }
 
     @Test
     @Order(12)
     void joinBad() throws Exception {
-        facade.playGame("BLACK", 1, "authToken");
+        facade.playGame(ChessGame.TeamColor.BLACK, 1, "authToken");
         System.out.println("There should be an error message right here ^^^");
     }
 
