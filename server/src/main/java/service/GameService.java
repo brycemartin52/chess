@@ -8,6 +8,7 @@ import model.JoinGameData;
 import model.UserData;
 
 import java.util.HashMap;
+import java.util.HashSet;
 
 public class GameService {
     SQLUserDAO udao;
@@ -66,7 +67,7 @@ public class GameService {
         return newGameData;
     }
 
-    public HashMap<Integer, GameData> listGames(String authToken) throws DataAccessException {
+    public HashSet<GameData> listGames(String authToken) throws DataAccessException {
         AuthData aData = adao.getAuth(authToken);
         if(aData != null){
             return gdao.listGames();

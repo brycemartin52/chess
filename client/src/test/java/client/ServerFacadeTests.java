@@ -9,6 +9,7 @@ import server.Server;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -98,8 +99,8 @@ public class ServerFacadeTests {
     @Test
     @Order(7)
     void listBad() throws Exception {
-        HashMap gameMap = facade.listGames(aData.authToken());
-        ArrayList<GameData> games = (ArrayList<GameData>) gameMap.get("games");
+        HashMap<String, HashSet<GameData>> gameMap = facade.listGames(aData.authToken());
+        HashSet<GameData> games = gameMap.get("games");
         Assertions.assertTrue(games.isEmpty());
     }
 
@@ -107,7 +108,7 @@ public class ServerFacadeTests {
     @Order(8)
     void createGood() throws Exception {
         GameData game = facade.createGame("New Game", aData.authToken());
-        HashMap<Integer, GameData> games = facade.listGames(aData.authToken());
+        HashMap<String, HashSet<GameData>> games = facade.listGames(aData.authToken());
         Assertions.assertFalse(games.isEmpty());
         assertEquals("New Game", game.gameName());
     }
@@ -130,7 +131,7 @@ public class ServerFacadeTests {
     @Order(10)
     void listGood() throws Exception {
         GameData game = facade.createGame("Different Game", aData.authToken());
-        HashMap<Integer, GameData> games = facade.listGames(aData.authToken());
+        HashMap<String, HashSet<GameData>> games = facade.listGames(aData.authToken());
         Assertions.assertFalse(games.isEmpty());
         assertEquals("Different Game", game.gameName());
     }

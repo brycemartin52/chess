@@ -17,6 +17,7 @@ import spark.*;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 public class Server {
@@ -141,10 +142,11 @@ public class Server {
     private Object listGameHandler(Request request, Response response) {
         String header = request.headers("authorization");
         try{
-            HashMap<Integer, GameData> games = gService.listGames(header);
-            Collection<GameData> list = games.values();
+            HashSet<GameData> games = gService.listGames(header);
+//            Collection<GameData> list = games.values();
             response.status(200);
-            return new Gson().toJson(Map.of("games", list));
+            var mapOfGames = new Gson().toJson(Map.of("games", games));
+            return mapOfGames;
         }
         catch(DataAccessException e){
             ErrorMessage error = new ErrorMessage("Error: unauthorized");

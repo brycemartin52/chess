@@ -1,15 +1,13 @@
 package client;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
+import java.util.*;
 
 import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;
 import exception.ResponseException;
 import model.AuthData;
 import model.GameData;
+import model.ListGames;
 import ui.ChessBoard;
 import ui.EscapeSequences;
 //import client.websocket.NotificationHandler;
@@ -99,7 +97,7 @@ public class ChessClient {
             username = aData.username();
             authToken = aData.authToken();
             loggedIn = true;
-            System.out.println(String.format("Welcome %s!%n%s", username));
+            System.out.println(String.format("Welcome %s!%n", username));
             return help();
         }
         throw new ResponseException(400, "Expected: (R)egister <username> <password> <email>");
@@ -139,15 +137,16 @@ public class ChessClient {
 
     public String listGames() throws ResponseException {
         assertSignedIn();
-        HashMap gameMap = server.listGames(authToken);
-        ArrayList<LinkedTreeMap> games = (ArrayList<LinkedTreeMap>) gameMap.get("games");
-        var thing = games.getFirst();
-        var gameThing = games.toArray();
+        ListGames gameSet = server.listGames(authToken);
+        if(gameSet == null || gameSet.games().isEmpty()){
+            return "There are no games yet. Create one to get started!";
+        }
+        HashSet<GameData> games = gameSet.games();
         var result = new StringBuilder();
-        var gson = new Gson();
-//        for (var game : games) {
-//            result.append(gson.toJson(game)).append('\n');
-//        }
+        for (var game : games) {
+            result.append(game.gameID()).append(": ").append(game.gameName()).append('\n');
+            result.append("White player: ").append(game.whiteUsername()).append("  ");
+        }
         return result.toString();
     }
 

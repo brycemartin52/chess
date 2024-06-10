@@ -3,14 +3,12 @@ package client;
 import chess.ChessGame;
 import com.google.gson.Gson;
 import exception.ResponseException;
-import model.AuthData;
-import model.GameData;
-import model.JoinGameData;
-import model.UserData;
+import model.*;
 
 import java.io.*;
 import java.net.*;
 import java.util.HashMap;
+import java.util.HashSet;
 
 public class ServerFacade {
     private final String serverUrl;
@@ -35,8 +33,8 @@ public class ServerFacade {
         return makeRequest("POST", "/game", game, GameData.class, authToken);
     }
 
-    public HashMap listGames(String authToken) {
-        return makeRequest("GET", "/game", null, HashMap.class, authToken);
+    public ListGames listGames(String authToken) {
+        return makeRequest("GET", "/game", null, ListGames.class, authToken);
     }
 
     public void playGame(String color, int gameID, String authToken) {

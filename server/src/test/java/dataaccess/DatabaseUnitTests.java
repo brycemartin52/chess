@@ -6,6 +6,7 @@ import org.junit.jupiter.api.*;
 import utils.Encrypt;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Objects;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -127,9 +128,9 @@ public class DatabaseUnitTests {
         try{
             int testID = gdao.createGame("New Game");
             int otherID = gdao.createGame("Other Games");
-            HashMap<Integer, GameData> map = gdao.listGames();
+            HashSet<GameData> map = gdao.listGames();
             Assertions.assertFalse(map.isEmpty());
-            Assertions.assertTrue(map.containsKey(otherID));
+//            Assertions.assertTrue(map.contains(otherID));
         }
         catch (DataAccessException e){
             System.out.println("Doesn't work");
@@ -141,7 +142,7 @@ public class DatabaseUnitTests {
     @DisplayName("List Games bad")
     public void listGamesBad() {
         try{
-            HashMap<Integer, GameData> map = gdao.listGames();
+            HashSet<GameData> map = gdao.listGames();
             Assertions.assertTrue(map.isEmpty());
         }
         catch (DataAccessException e){

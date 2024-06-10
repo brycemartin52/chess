@@ -5,6 +5,7 @@ import model.GameData;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 public class GameDAO implements GameDAOInterface {
 
@@ -32,8 +33,8 @@ public class GameDAO implements GameDAOInterface {
     }
 
     @Override
-    public HashMap<Integer, GameData> listGames() {
-        return gameData;
+    public HashSet<GameData> listGames() {
+        return new HashSet<>(gameData.values());
     }
 
     @Override
