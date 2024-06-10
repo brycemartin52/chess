@@ -1,11 +1,17 @@
 package client;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
 
 import com.google.gson.Gson;
+import com.google.gson.internal.LinkedTreeMap;
 import exception.ResponseException;
 import model.AuthData;
+import model.GameData;
 import ui.ChessBoard;
+import ui.EscapeSequences;
 //import client.websocket.NotificationHandler;
 //import client.websocket.WebSocketFacade;
 
@@ -49,25 +55,25 @@ public class ChessClient {
     public String eval(String input) {
         try {
             var tokens = input.toLowerCase().split(" ");
-            var cmd = (tokens.length > 0) ? tokens[0] : "Help";
-            var params = Arrays.copyOfRange(tokens, 1, tokens.length);
+            var cmd = (tokens.length > 0) ? tokens[0] : "help";
+            var params = Arrays.copyOfRange(input.split(" "), 1, tokens.length);
             if(loggedIn) {
                 return switch (cmd) {
-                    case "New", "N" -> createGame(params);
-                    case "All", "A" -> listGames();
-                    case "Play", "P" -> playGame();
-                    case "Watch", "W" -> watchGame(params);
-                    case "Help", "H" -> help();
-                    case "Logout", "O" -> logout();
-                    default -> "Unknown command";
+                    case "new", "n" -> createGame(params);
+                    case "all", "a" -> listGames();
+                    case "play", "p" -> playGame();
+                    case "watch", "w" -> watchGame(params);
+                    case "help", "h" -> help();
+                    case "logout", "o" -> logout();
+                    default -> "Unknown command\n";
                 };
             }
             else{
                 return switch (cmd) {
-                    case "Register", "R" -> register(params);
-                    case "Login", "L" -> login(params);
-                    case "Help", "H" -> help();
-                    case "Quit", "Q" -> "Quit";
+                    case "register", "r" -> register(params);
+                    case "login", "l" -> login(params);
+                    case "help", "h" -> help();
+                    case "quit", "q" -> "Quit";
                     default -> "Unknown command";
                 };
             }
@@ -78,7 +84,7 @@ public class ChessClient {
 
     public String register(String... params) throws ResponseException {
         if (params.length >= 3) {
-            username = params[0];
+            String attemptedUsername = params[0];
             String password = params[1];
             String email = params[2];
             if (!email.contains("@")) {
@@ -86,15 +92,15 @@ public class ChessClient {
             }
 //            ws = new WebSocketFacade(serverUrl, notificationHandler);
 //            ws.enterPetShop(username);
-            AuthData aData = server.register(username, password, email);
+            AuthData aData = server.register(attemptedUsername, password, email);
             if(aData == null){
-                username = null;
-                return String.format("Sorry, but it looks like the username '%s' is already taken.", username);
+                return String.format("Sorry, but it looks like the username '%s' is already taken.", attemptedUsername);
             }
             username = aData.username();
             authToken = aData.authToken();
             loggedIn = true;
-            return String.format("Welcome %s!", username);
+            System.out.println(String.format("Welcome %s!%n%s", username));
+            return help();
         }
         throw new ResponseException(400, "Expected: (R)egister <username> <password> <email>");
     }
@@ -123,21 +129,25 @@ public class ChessClient {
 //        ws.leavePetShop(visitorName);
 //        ws = null;
         server.logout(authToken);
+        String message = String.format("See you next time, %s.", username);
         username = null;
         authToken = null;
         loggedIn = false;
-        return String.format("See you next time, %s.", username);
+        return message;
     }
 
 
     public String listGames() throws ResponseException {
         assertSignedIn();
-        var games = server.listGames(authToken);
+        HashMap gameMap = server.listGames(authToken);
+        ArrayList<LinkedTreeMap> games = (ArrayList<LinkedTreeMap>) gameMap.get("games");
+        var thing = games.getFirst();
+        var gameThing = games.toArray();
         var result = new StringBuilder();
         var gson = new Gson();
-        for (var game : games.values()) {
-            result.append(gson.toJson(game)).append('\n');
-        }
+//        for (var game : games) {
+//            result.append(gson.toJson(game)).append('\n');
+//        }
         return result.toString();
     }
 
@@ -147,8 +157,8 @@ public class ChessClient {
             String gameName = params[0];
 //            ws = new WebSocketFacade(serverUrl, notificationHandler);
 //            ws.enterPetShop(username);
-            server.createGame(gameName, authToken);
-            return "Let's get ready to rumble!";
+            GameData gameData = server.createGame(gameName, authToken);
+            return "Game Created";
         }
         throw new ResponseException(400, "Expected: (C)reate <Name_of_the_game>");
     }

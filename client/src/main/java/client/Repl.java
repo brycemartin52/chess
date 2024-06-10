@@ -1,5 +1,7 @@
 package client;
 
+import ui.EscapeSequences;
+
 import java.util.Scanner;
 import static ui.EscapeSequences.*;
 
@@ -15,22 +17,23 @@ public class Repl {
     }
 
     public void run() {
-        System.out.println("\uD83D\uDC36 Welcome to Chess! Sign in to start.");
-        System.out.print(client.help());
+        System.out.println(WHITE_KING + "Welcome to Chess! Login in to start.");
 
         Scanner scanner = new Scanner(System.in);
         var result = "";
         while (!result.equals("Quit")) {
             printPrompt();
             String line = scanner.nextLine();
-
             try {
-                client.displayMenu();
                 result = client.eval(line);
                 System.out.print(SET_TEXT_COLOR_BLUE + result);
             } catch (Throwable e) {
                 var msg = e.toString();
                 System.out.print(msg);
+            }
+            if(!line.equals("H") && !line.equals("h") && !line.equals("Help")){
+                System.out.println(SET_TEXT_COLOR_WHITE);
+                client.displayMenu();
             }
         }
         System.out.println();
