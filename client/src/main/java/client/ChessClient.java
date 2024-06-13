@@ -11,10 +11,11 @@ import model.AuthData;
 import model.GameData;
 import model.ListGames;
 import ui.ChessBoard;
+import websocket.messages.ServerMessage;
 //import client.websocket.NotificationHandler;
 //import client.websocket.WebSocketFacade;
 
-public class ChessClient {
+public class ChessClient implements NotificationHandler{
     private String username;
     private String authToken;
     private final ServerFacade server;
@@ -390,5 +391,10 @@ public class ChessClient {
         if (!loggedIn) {
             throw new ResponseException(400, "You must sign in");
         }
+    }
+
+    @Override
+    public void notify(ServerMessage notification) {
+
     }
 }
