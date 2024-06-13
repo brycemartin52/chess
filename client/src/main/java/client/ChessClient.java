@@ -45,9 +45,11 @@ public class ChessClient {
         }
 
         else if(inGame){
-            System.out.println("(M)ake Move");
+            System.out.println("(R)edraw");
+            System.out.println("(Hi)ghlight <piecePos>");
+            System.out.println("(L)eave");
+            System.out.println("Resign/(Q)");
             System.out.println("(H)elp");
-            System.out.println("(Q)uit");
         }
 
         else{
@@ -256,7 +258,7 @@ public class ChessClient {
             // Validate the piece
             // Collect the moves
             // Print the highlighted board
-            return String.format("Highlighted", username);
+            return "Highlighted";
         }
         throw new ResponseException(400, "Expected: (H)ighlight <position>");
     }
@@ -269,6 +271,18 @@ public class ChessClient {
                     'Login' or 'L': Login to view your games
                     'Help' or 'H': Show possible actions
                     'Quit' or 'Q': Exit application
+                """;
+        }
+        else if(inGame){
+            return """
+                Type...
+                    'Redraw' or 'R': Redraws the board
+                    'Highlight' or 'Hi': type a position where you'd
+                        like to see the possible moves for a piece.
+                    'Leave' or 'L': Leave the game (you can rejoin later,
+                    or someone else can take your place.
+                    'Resign' or 'Q': Resign the game. Better luck next time!
+                    'Help' or 'H': Show possible actions
                 """;
         }
         return """
