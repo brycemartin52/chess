@@ -24,6 +24,7 @@ public class SQLGameDAO implements GameDAOInterface {
               `blackUsername` varchar(128) NULL,
               `gameName` varchar(128) NOT NULL,
               `game` longtext NOT NULL,
+              `finished` BOOLEAN NULL,
               PRIMARY KEY (`gameID`),
               INDEX(gameName)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
@@ -47,13 +48,14 @@ public class SQLGameDAO implements GameDAOInterface {
         var whiteUsername = rs.getString("whiteUsername");
         var blackUsername = rs.getString("blackUsername");
         var gameName = rs.getString("gameName");
-        return new GameData(gameID, whiteUsername, blackUsername, gameName, game);
+        var finished = rs.getBoolean("finished");
+        return new GameData(gameID, whiteUsername, blackUsername, gameName, game, finished);
     }
 
     @Override
     public GameData getGame(int gameID) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
-            var statement = "SELECT gameID, game, whiteUsername, blackUsername, gameName FROM gameData WHERE gameID=?;";
+            var statement = "SELECT gameID, game, whiteUsername, blackUsername, gameName, finished FROM gameData WHERE gameID=?;";
             try (var ps = conn.prepareStatement(statement)) {
                 ps.setInt(1, gameID);
                 try (var rs = ps.executeQuery()) {
@@ -89,9 +91,9 @@ public class SQLGameDAO implements GameDAOInterface {
 
     @Override
     public void updateGame(GameData newGame) throws DataAccessException {
-        var statement = "UPDATE gameData SET game = ?, whiteUsername = ?, blackUsername = ? WHERE gameID=?;";
+        var statement = "UPDATE gameData SET game = ?, whiteUsername = ?, blackUsername = ?, finished = ? WHERE gameID=?;";
         String gameJson = gSerializer.chessGameSerializer(newGame.game());
-        executeUpdate(statement, gameJson, newGame.whiteUsername(), newGame.blackUsername(), newGame.gameID());
+        executeUpdate(statement, gameJson, newGame.whiteUsername(), newGame.blackUsername(), newGame.finished(), newGame.gameID());
     }
 
     @Override

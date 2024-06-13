@@ -8,6 +8,7 @@ import model.AuthData;
 import model.GameData;
 import model.JoinGameData;
 import model.UserData;
+import websocket.messages.ServerMessage;
 
 public class GsonSerializer {
     Gson serializer;
@@ -24,6 +25,7 @@ public class GsonSerializer {
         return serializer.toJson(auth);
     }
     public String errSerializer(ErrorMessage error) { return serializer.toJson(error);}
+    public String messageSerializer(ServerMessage message) { return serializer.toJson(message);}
 
     public UserData userDeserializer(String user){
         return serializer.fromJson(user, UserData.class);

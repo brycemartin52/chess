@@ -55,13 +55,13 @@ public class GameService {
             if(curWhiteUser != null && !curWhiteUser.equals(username)) {
                 throw new DataAccessException("Error: already taken");
             }
-            newGameData = new GameData(game.gameID(), username, game.blackUsername(), game.gameName(), game.game());
+            newGameData = new GameData(game.gameID(), username, game.blackUsername(), game.gameName(), game.game(), game.finished());
         }
         else{
             if(curBlackUser != null && !curBlackUser.equals(username)) {
                 throw new DataAccessException("Error: already taken");
             }
-            newGameData = new GameData(game.gameID(), game.whiteUsername(), username, game.gameName(), game.game());
+            newGameData = new GameData(game.gameID(), game.whiteUsername(), username, game.gameName(), game.game(), game.finished());
         }
         gdao.updateGame(newGameData);
         return newGameData;

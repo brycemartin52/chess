@@ -23,7 +23,7 @@ public class Server {
     GameService gService;
     UserService uService;
     AuthService aService;
-    WebSocketService wService;
+    WebSocketHandler wService;
 
     public Server(){
         try{
@@ -32,7 +32,7 @@ public class Server {
         gService = new GameService();
         uService = new UserService();
         aService = new AuthService();
-        wService = new WebSocketService();
+        wService = new WebSocketHandler();
         }
         catch(Exception e){
         System.out.println("The Server failed to start up");
@@ -162,7 +162,7 @@ public class Server {
         try{
             int code = gService.createGame(header, body);
             ChessGame newGame = new ChessGame();
-            GameData gData = new GameData(code, null, null, body, newGame);
+            GameData gData = new GameData(code, null, null, body, newGame, false);
             String game = gSerializer.gameSerializer(gData);
             response.status(200);
             return game;

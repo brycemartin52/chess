@@ -22,7 +22,7 @@ public class GameDAO implements GameDAOInterface {
     @Override
     public int createGame(String gameName) {
         numGames++;
-        GameData newGame = new GameData(numGames, null, null, gameName, new ChessGame());
+        GameData newGame = new GameData(numGames, null, null, gameName, new ChessGame(), false);
         gameData.put(numGames, newGame);
         return numGames;
     }
