@@ -43,7 +43,7 @@ public class ChessClient {
             System.out.println("(Q)uit");
         }
 
-        if(playingGame){
+        else if(playingGame){
             System.out.println("(M)ake Move");
             System.out.println("(H)elp");
             System.out.println("(Q)uit");
@@ -59,7 +59,7 @@ public class ChessClient {
         }
     }
 
-    public String eval(String input) {
+    public String eval(String input){
         try {
             var tokens = input.toLowerCase().split(" ");
             var cmd = (tokens.length > 0) ? tokens[0] : "help";
@@ -84,12 +84,12 @@ public class ChessClient {
                     default -> "Unknown command";
                 };
             }
-        } catch (ResponseException ex) {
+        } catch (Exception ex) {
             return ex.getMessage();
         }
     }
 
-    public String register(String... params) throws ResponseException {
+    public String register(String... params) throws ResponseException, Exception {
         if (params.length >= 3) {
             String attemptedUsername = params[0];
             String password = params[1];
@@ -106,13 +106,13 @@ public class ChessClient {
             username = aData.username();
             authToken = aData.authToken();
             loggedIn = true;
-            System.out.println(String.format("Welcome %s!%n", username));
+            System.out.printf("Welcome %s!%n", username);
             return help();
         }
         throw new ResponseException(400, "Expected: (R)egister <username> <password> <email>");
     }
 
-    public String login(String... params) throws ResponseException {
+    public String login(String... params) throws ResponseException, Exception {
         if (params.length >= 2) {
             username = params[0];
             String password = params[1];
@@ -131,7 +131,7 @@ public class ChessClient {
         throw new ResponseException(400, "Expected: (L)ogin <username> <password>");
     }
 
-    public String logout() throws ResponseException {
+    public String logout() throws ResponseException, Exception {
         assertSignedIn();
 //        ws.leavePetShop(visitorName);
 //        ws = null;
@@ -144,7 +144,7 @@ public class ChessClient {
     }
 
 
-    public String listGames() throws ResponseException {
+    public String listGames() throws ResponseException, Exception {
         assertSignedIn();
         ListGames gameSet = server.listGames(authToken);
         if(gameSet == null || gameSet.games().isEmpty()){
@@ -160,7 +160,7 @@ public class ChessClient {
         return result.toString();
     }
 
-    public String createGame(String... params) throws ResponseException {
+    public String createGame(String... params) throws ResponseException, Exception {
         assertSignedIn();
         if (params.length >= 1) {
             String gameName = params[0];
@@ -172,7 +172,7 @@ public class ChessClient {
         throw new ResponseException(400, "Expected: (C)reate <Name_of_the_game>");
     }
 
-    public String playGame(Object... params) throws ResponseException {
+    public String playGame(Object... params) throws ResponseException, Exception {
         assertSignedIn();
         if (params.length >= 2) {
             String color = (String) params[0];
@@ -195,7 +195,7 @@ public class ChessClient {
     public String watchGame(Object... params) throws ResponseException {
         assertSignedIn();
         if (params.length >= 1) {
-            int gameID = (int) params[0];
+            int gameID = Integer.parseInt((String) params[0]);
 //            ws = new WebSocketFacade(serverUrl, notificationHandler);
 //            ws.enterPetShop(username);
             ChessBoard.main(new String[0]);

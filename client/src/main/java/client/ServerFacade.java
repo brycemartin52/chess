@@ -18,39 +18,39 @@ public class ServerFacade {
         serverUrl = url;
     }
 
-    public AuthData login(String username, String password) {
+    public AuthData login(String username, String password) throws Exception {
         UserData user = new UserData(username, password, null);
         return makeRequest("POST", "/session", user, AuthData.class, null);
     }
 
-    public AuthData register(String username, String password, String email) {
+    public AuthData register(String username, String password, String email) throws Exception {
         UserData user = new UserData(username, password, email);
         return makeRequest("POST", "/user", user, AuthData.class, null);
     }
 
-    public GameData createGame(String gameName, String authToken) {
+    public GameData createGame(String gameName, String authToken) throws Exception {
         GameData game = new GameData(0, null, null, gameName, null);
         return makeRequest("POST", "/game", game, GameData.class, authToken);
     }
 
-    public ListGames listGames(String authToken) {
+    public ListGames listGames(String authToken) throws Exception {
         return makeRequest("GET", "/game", null, ListGames.class, authToken);
     }
 
-    public void playGame(ChessGame.TeamColor team, int gameID, String authToken) {
+    public void playGame(ChessGame.TeamColor team, int gameID, String authToken) throws Exception {
         JoinGameData data = new JoinGameData(team, gameID);
         makeRequest("PUT", "/game", data, null, authToken);
     }
 
-    public void logout(String authToken) {
+    public void logout(String authToken) throws Exception {
         makeRequest("DELETE", "/session", null, null, authToken);
     }
 
-    public void clear() {
+    public void clear() throws Exception {
         makeRequest("DELETE", "/db", null, null, null);
     }
 
-    public <T> T makeRequest(String requestMethod, String endpoint, Object request, Class<T> responseClass, String header) {
+    public <T> T makeRequest(String requestMethod, String endpoint, Object request, Class<T> responseClass, String header) throws Exception{
         try{
             URL url = (new URI(serverUrl + endpoint)).toURL();
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -69,7 +69,7 @@ public class ServerFacade {
         }
         catch(Exception e){
             System.out.printf("Error: %s%n", e.getMessage());
-            return null;
+            throw new Exception(e.getMessage());
         }
     }
 
