@@ -20,7 +20,8 @@ public class ChessClient {
     private final ServerFacade server;
     private final String serverUrl;
     private boolean loggedIn;
-    private boolean playingGame;
+    private boolean inGame;
+    private ChessGame currentGame;
 
 //    private final NotificationHandler notificationHandler;
 //    private WebSocketFacade ws;
@@ -31,7 +32,7 @@ public class ChessClient {
         loggedIn = false;
         username = null;
         authToken = null;
-        playingGame = false;
+        inGame = false;
 //        this.notificationHandler = notificationHandler;
     }
 
@@ -43,7 +44,7 @@ public class ChessClient {
             System.out.println("(Q)uit");
         }
 
-        else if(playingGame){
+        else if(inGame){
             System.out.println("(M)ake Move");
             System.out.println("(H)elp");
             System.out.println("(Q)uit");
@@ -65,15 +66,28 @@ public class ChessClient {
             var cmd = (tokens.length > 0) ? tokens[0] : "help";
             var params = Arrays.copyOfRange(input.split(" "), 1, tokens.length);
             if(loggedIn) {
-                return switch (cmd) {
-                    case "new", "n" -> createGame(params);
-                    case "all", "a" -> listGames();
-                    case "play", "p" -> playGame(params);
-                    case "watch", "w" -> watchGame(params);
-                    case "help", "h" -> help();
-                    case "logout", "o" -> logout();
-                    default -> "Unknown command\n";
-                };
+                if(!inGame) {
+                    return switch (cmd) {
+                        case "new", "n" -> createGame(params);
+                        case "all", "a" -> listGames();
+                        case "play", "p" -> playGame(params);
+                        case "watch", "w" -> watchGame(params);
+                        case "help", "h" -> help();
+                        case "logout", "o" -> logout();
+                        default -> "Unknown command\n";
+                    };
+                }
+                else{
+                    return switch (cmd) {
+                        case "help", "h" -> help();
+                        case "redraw", "r" -> ChessBoard.printBoard(currentGame);
+                        case "leave", "l" -> listGames();
+                        case "resign", "q" -> playGame();
+                        case "move", "m" -> makeMove(params);
+                        case "highlight", "hi" -> highlight(params);
+                        default -> "Unknown command\n";
+                    };
+                }
             }
             else{
                 return switch (cmd) {
@@ -143,14 +157,18 @@ public class ChessClient {
         return message;
     }
 
-
-    public String listGames() throws ResponseException, Exception {
+    public HashSet<GameData> getGames() throws ResponseException, Exception {
         assertSignedIn();
         ListGames gameSet = server.listGames(authToken);
         if(gameSet == null || gameSet.games().isEmpty()){
-            return "There are no games yet. Create one to get started!";
+            return null;
         }
-        HashSet<GameData> games = gameSet.games();
+        return gameSet.games();
+    }
+
+
+    public String listGames() throws ResponseException, Exception {
+        HashSet<GameData> games = getGames();
         var result = new StringBuilder();
         for (var game : games) {
             result.append(game.gameID()).append(": ").append(game.gameName()).append('\n');
@@ -166,7 +184,7 @@ public class ChessClient {
             String gameName = params[0];
 //            ws = new WebSocketFacade(serverUrl, notificationHandler);
 //            ws.enterPetShop(username);
-           GameData game =  server.createGame(gameName, authToken);
+            server.createGame(gameName, authToken);
             return "Game Created";
         }
         throw new ResponseException(400, "Expected: (C)reate <Name_of_the_game>");
@@ -184,12 +202,20 @@ public class ChessClient {
             };
 //            ws = new WebSocketFacade(serverUrl, notificationHandler);
 //            ws.enterPetShop(username);
+
             server.playGame(team, gameID, authToken);
-            ChessBoard.main(new String[0]);
-            playingGame = true;
+            HashSet<GameData> games = getGames();
+            for(var game : games){
+                if(game.gameID() == gameID){
+                    ChessBoard.printBoard(game.game());
+                    currentGame = game.game();
+                    break;
+                }
+            }
+            inGame = true;
             return "Joined Game";
         }
-        throw new ResponseException(400, "Expected: (P)lay <WHITE or BLACK> <gameID>");
+        throw new ResponseException(400, "Expected: (P)lay <(W)HITE or (B)LACK> <gameID>");
     }
 
     public String watchGame(Object... params) throws ResponseException {
@@ -199,10 +225,40 @@ public class ChessClient {
 //            ws = new WebSocketFacade(serverUrl, notificationHandler);
 //            ws.enterPetShop(username);
             ChessBoard.main(new String[0]);
-            playingGame = true;
+            inGame = true;
             return "Joined Game";
         }
         throw new ResponseException(400, "Expected: (P)lay <WHITE or BLACK> <gameID>");
+    }
+
+    public String makeMove(String... params) throws ResponseException, Exception {
+        if (params.length >= 2) {
+            String fromPos = params[0];
+            String toPos = params[1];
+//            ws = new WebSocketFacade(serverUrl, notificationHandler);
+//            ws.enterPetShop(username);
+
+            // Do the move
+            // print the new board
+            // Print the move to everyone else
+            // If in check/mate/stalemate, notifiy the others
+            return String.format("Move made: get rid of this %s", username);
+        }
+        throw new ResponseException(400, "Expected: (M)ake <beginning position> <ending position>");
+    }
+
+    public String highlight(String... params) throws ResponseException, Exception {
+        if (params.length >= 1) {
+            String piecePos = params[0];
+//            ws = new WebSocketFacade(serverUrl, notificationHandler);
+//            ws.enterPetShop(username);
+
+            // Validate the piece
+            // Collect the moves
+            // Print the highlighted board
+            return String.format("Highlighted", username);
+        }
+        throw new ResponseException(400, "Expected: (H)ighlight <position>");
     }
 
     public String help() {

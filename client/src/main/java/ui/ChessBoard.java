@@ -28,27 +28,30 @@ public class ChessBoard {
 
 
     public static void main(String[] args) {
-        var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
         ChessGame game = new ChessGame();
+        printBoard(game);
+    }
+
+    public static String printBoard(ChessGame game){
+        var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
         board = game.getBoard();
 
         out.print(ERASE_SCREEN);
 
-        perspective = ChessGame.TeamColor.WHITE;
-        drawHeaders(out);
-        drawTicTacToeBoard(out);
-        drawHeaders(out);
+        if(game.getTeamTurn() == ChessGame.TeamColor.WHITE){
+            perspective = ChessGame.TeamColor.WHITE;
+        }
+        else{
+            perspective = ChessGame.TeamColor.BLACK;
+        }
 
-        out.print(SET_BG_COLOR_BLACK);
-        out.println();
-
-        perspective = ChessGame.TeamColor.BLACK;
         drawHeaders(out);
         drawTicTacToeBoard(out);
         drawHeaders(out);
 
         out.print(SET_BG_COLOR_BLACK);
         out.print(SET_TEXT_COLOR_WHITE);
+        return "Printed";
     }
 
     private static void drawHeaders(PrintStream out) {
