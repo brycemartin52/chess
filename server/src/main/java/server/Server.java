@@ -3,7 +3,6 @@ package server;
 import chess.ChessGame;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
-import dataaccess.DatabaseManager;
 import dataaccess.ErrorMessage;
 import gson.GsonSerializer;
 import model.AuthData;
@@ -15,8 +14,6 @@ import service.GameService;
 import service.UserService;
 import spark.*;
 
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
@@ -145,8 +142,7 @@ public class Server {
             HashSet<GameData> games = gService.listGames(header);
 //            Collection<GameData> list = games.values();
             response.status(200);
-            var mapOfGames = new Gson().toJson(Map.of("games", games));
-            return mapOfGames;
+            return new Gson().toJson(Map.of("games", games));
         }
         catch(DataAccessException e){
             ErrorMessage error = new ErrorMessage("Error: unauthorized");
@@ -179,7 +175,7 @@ public class Server {
         String header = request.headers("authorization");
         JoinGameData body = gSerializer.joinDeserializer(request.body());
         try{
-            GameData gData = gService.joinGame(header, body);
+            gService.joinGame(header, body);
             response.status(200);
             return "{}";
         }

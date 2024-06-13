@@ -6,15 +6,11 @@ import chess.ChessGame;
 import chess.ChessMove;
 import chess.ChessPiece;
 import chess.ChessPosition;
-import com.google.gson.Gson;
-import com.google.gson.internal.LinkedTreeMap;
 import exception.ResponseException;
 import model.AuthData;
 import model.GameData;
 import model.ListGames;
-import org.glassfish.grizzly.utils.Pair;
 import ui.ChessBoard;
-import ui.EscapeSequences;
 //import client.websocket.NotificationHandler;
 //import client.websocket.WebSocketFacade;
 
@@ -25,8 +21,7 @@ public class ChessClient {
     private final String serverUrl;
     private boolean loggedIn;
     private boolean inGame;
-    private ChessGame currentGame;
-
+    private GameData currentGameData;
 //    private final NotificationHandler notificationHandler;
 //    private WebSocketFacade ws;
 
@@ -87,9 +82,9 @@ public class ChessClient {
                 else{
                     return switch (cmd) {
                         case "help", "h" -> help();
-                        case "redraw", "r" -> ChessBoard.printBoard(currentGame, null);
-                        case "leave", "l" -> listGames();
-                        case "resign", "q" -> playGame();
+                        case "redraw", "r" -> ChessBoard.printBoard(currentGameData.game(), null);
+                        case "leave", "l" -> leaveGame();
+                        case "resign", "q" -> resign();
                         case "move", "m" -> makeMove(params);
                         case "highlight", "hi" -> highlight(params);
                         default -> "Unknown command\n";
@@ -164,6 +159,16 @@ public class ChessClient {
         return message;
     }
 
+    public GameData getGame(int gameID) throws Exception{
+        HashSet<GameData> games = getGames();
+        for (var game : games) {
+            if(game.gameID() == gameID){
+                return game;
+            }
+        }
+        return null;
+    }
+
     public HashSet<GameData> getGames() throws ResponseException, Exception {
         assertSignedIn();
         ListGames gameSet = server.listGames(authToken);
@@ -215,7 +220,7 @@ public class ChessClient {
             for(var game : games){
                 if(game.gameID() == gameID){
                     ChessBoard.printBoard(game.game(), null);
-                    currentGame = game.game();
+                    currentGameData = game;
                     break;
                 }
             }
@@ -259,8 +264,18 @@ public class ChessClient {
         return new ChessPosition(row, column);
     }
 
+    private void throwIfGameOver() throws Exception {
+        if(currentGameData.game().isInCheckmate(ChessGame.TeamColor.WHITE) ||
+                currentGameData.game().isInCheckmate(ChessGame.TeamColor.BLACK) ||
+                currentGameData.game().isInStalemate(ChessGame.TeamColor.WHITE) ||
+                currentGameData.game().isInStalemate(ChessGame.TeamColor.BLACK) ){
+            throw new Exception("Cannot make a move when the game is finished");
+        }
+    }
+
     public String makeMove(String... params) throws ResponseException, Exception {
         if (params.length >= 2) {
+            throwIfGameOver();
             String fromPos = params[0];
             String toPos = params[1];
             ChessPiece.PieceType promotion;
@@ -278,8 +293,8 @@ public class ChessClient {
             }
 //            ws = new WebSocketFacade(serverUrl, notificationHandler);
 //            ws.enterPetShop(username);
-            currentGame.makeMove(new ChessMove(convertToPos(fromPos), convertToPos(toPos), promotion));
-            // update the board
+            currentGameData.game().makeMove(new ChessMove(convertToPos(fromPos), convertToPos(toPos), promotion));
+            // update the game
             // Print the board for everyone
             // If in check/mate/stalemate, notifiy the others
             return String.format("Move made: get rid of this %s", username);
@@ -306,14 +321,34 @@ public class ChessClient {
             catch(IllegalArgumentException e){
                 throw new IllegalArgumentException(e.getMessage());
             }
-            if(currentGame.getBoard().getPiece(position) == null){
+            if(currentGameData.game().getBoard().getPiece(position) == null){
                 throw new IllegalArgumentException(String.format("There is no piece on position %s", position));
             }
-            ArrayList<ChessMove> allMoves = (ArrayList<ChessMove>) currentGame.validMoves(position);
-            ChessBoard.printBoard(currentGame, getHighlightPos(allMoves));
+            ArrayList<ChessMove> allMoves = (ArrayList<ChessMove>) currentGameData.game().validMoves(position);
+            ChessBoard.printBoard(currentGameData.game(), getHighlightPos(allMoves));
             return "Highlighted";
         }
         throw new ResponseException(400, "Expected: (H)ighlight <position>");
+    }
+
+    public String leaveGame() throws Exception {
+        GameData game = currentGameData;
+        GameData updatedGame;
+        if(username.equals(game.whiteUsername())){
+            updatedGame = new GameData(game.gameID(), null, game.blackUsername(), game.gameName(), game.game());
+        }
+        else{
+            updatedGame = new GameData(game.gameID(), game.whiteUsername(), null, game.gameName(), game.game());
+        }
+        // Update the game in the DataBase
+        //Notify the other player of the leaving
+        return "Game left";
+    }
+
+    public String resign() throws Exception {
+        leaveGame();
+
+        return "Resigned. Better luck next time!";
     }
 
     public String help() {
@@ -335,7 +370,7 @@ public class ChessClient {
                     'Highlight' or 'Hi': type a position where you'd
                         like to see the possible moves for a piece
                     'Leave' or 'L': Leave the game (you can rejoin later,
-                    or someone else can take your place
+                        or someone else can take your place
                     'Resign' or 'Q': Resign the game. Better luck next time!
                     'Help' or 'H': Show possible actions
                 """;
