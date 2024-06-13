@@ -10,6 +10,10 @@ import java.util.Objects;
  */
 public class UserGameCommand {
 
+    protected CommandType commandType;
+
+    private final String authToken;
+
     public UserGameCommand(String authToken) {
         this.authToken = authToken;
     }
@@ -20,10 +24,6 @@ public class UserGameCommand {
         LEAVE,
         RESIGN
     }
-
-    protected CommandType commandType;
-
-    private final String authToken;
 
     public String getAuthString() {
         return authToken;

@@ -1,13 +1,12 @@
 package ui;
 
 import chess.ChessGame;
-import chess.ChessMove;
 import chess.ChessPiece;
 import chess.ChessPosition;
 
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Random;
+import java.util.ArrayList;
 
 import static ui.EscapeSequences.*;
 
@@ -25,16 +24,18 @@ public class ChessBoard {
     private static final String KING = BLACK_KING;
     private static chess.ChessBoard board = new chess.ChessBoard();
     private static ChessGame.TeamColor perspective;
+    private static ArrayList<ChessPosition> hiCoordinates;
 
 
     public static void main(String[] args) {
         ChessGame game = new ChessGame();
-        printBoard(game);
+        printBoard(game, null);
     }
 
-    public static String printBoard(ChessGame game){
+    public static String printBoard(ChessGame game, ArrayList <ChessPosition> highlightCoordinates){
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
         board = game.getBoard();
+        hiCoordinates = highlightCoordinates;
 
         out.print(ERASE_SCREEN);
 
@@ -96,22 +97,39 @@ public class ChessBoard {
             }
 
             for (int boardCol = 0; boardCol < BOARD_SIZE_IN_SQUARES; boardCol++) {
-                if ((boardCol + row)%2 == 0){
-                    setWhite(out);
-                }
-                else{
-                    setBlack(out);
-                }
-                ChessPosition pos;
-                if(perspective == ChessGame.TeamColor.BLACK){
-                    pos = new ChessPosition(row + 1, 8 - boardCol);
-                }
-                else{
-                    pos = new ChessPosition(8 - row, boardCol + 1);
-                }
+                ChessPosition pos = switch (perspective){
+                    case ChessGame.TeamColor.BLACK -> new ChessPosition(row + 1, 8 - boardCol);
+                    case ChessGame.TeamColor.WHITE -> new ChessPosition(8 - row, boardCol + 1);
+                };
 
-                ChessPiece piece = board.getPiece(pos);
-                printPlayer(out, piece);
+                if ((boardCol + row)%2 == 0){
+                    if(hiCoordinates != null && hiCoordinates.contains(pos)){
+                        if(hiCoordinates.getFirst().equals(pos)){
+                            setYellow(out);
+                        }
+                        else{
+                            setHighlightedWhite(out);
+                        }
+                    }
+                    else{
+                        setWhite(out);
+                    }
+
+                }
+                else{
+                    if(hiCoordinates != null && hiCoordinates.contains(pos)){
+                        if(hiCoordinates.getFirst().equals(pos)){
+                            setYellow(out);
+                        }
+                        else{
+                            setHighlightedBlack(out);
+                        }
+                    }
+                    else{
+                        setBlack(out);
+                    }
+                }
+                printPlayer(out, board.getPiece(pos));
 
             }
             setHeader(out);
@@ -127,8 +145,23 @@ public class ChessBoard {
         out.print(SET_TEXT_COLOR_WHITE);
     }
 
+    private static void setHighlightedWhite(PrintStream out) {
+        out.print(SET_BG_COLOR_GREEN);
+        out.print(SET_TEXT_COLOR_WHITE);
+    }
+
+    private static void setYellow(PrintStream out) {
+        out.print(SET_BG_COLOR_YELLOW);
+        out.print(SET_TEXT_COLOR_WHITE);
+    }
+
     private static void setBlack(PrintStream out) {
         out.print(SET_BG_COLOR_BLACK);
+        out.print(SET_TEXT_COLOR_BLACK);
+    }
+
+    private static void setHighlightedBlack(PrintStream out) {
+        out.print(SET_BG_COLOR_DARK_GREEN);
         out.print(SET_TEXT_COLOR_BLACK);
     }
 

@@ -3,12 +3,16 @@ package client;
 import java.util.*;
 
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.ChessPiece;
+import chess.ChessPosition;
 import com.google.gson.Gson;
 import com.google.gson.internal.LinkedTreeMap;
 import exception.ResponseException;
 import model.AuthData;
 import model.GameData;
 import model.ListGames;
+import org.glassfish.grizzly.utils.Pair;
 import ui.ChessBoard;
 import ui.EscapeSequences;
 //import client.websocket.NotificationHandler;
@@ -46,6 +50,7 @@ public class ChessClient {
 
         else if(inGame){
             System.out.println("(R)edraw");
+            System.out.println("(M)ove");
             System.out.println("(Hi)ghlight <piecePos>");
             System.out.println("(L)eave");
             System.out.println("Resign/(Q)");
@@ -82,7 +87,7 @@ public class ChessClient {
                 else{
                     return switch (cmd) {
                         case "help", "h" -> help();
-                        case "redraw", "r" -> ChessBoard.printBoard(currentGame);
+                        case "redraw", "r" -> ChessBoard.printBoard(currentGame, null);
                         case "leave", "l" -> listGames();
                         case "resign", "q" -> playGame();
                         case "move", "m" -> makeMove(params);
@@ -209,7 +214,7 @@ public class ChessClient {
             HashSet<GameData> games = getGames();
             for(var game : games){
                 if(game.gameID() == gameID){
-                    ChessBoard.printBoard(game.game());
+                    ChessBoard.printBoard(game.game(), null);
                     currentGame = game.game();
                     break;
                 }
@@ -233,31 +238,79 @@ public class ChessClient {
         throw new ResponseException(400, "Expected: (P)lay <WHITE or BLACK> <gameID>");
     }
 
+    public static ChessPosition convertToPos(String input) {
+        if (input == null || input.length() != 2) {
+            throw new IllegalArgumentException("Input must be a two-character string.");
+        }
+
+        char columnChar = input.charAt(0);
+        char rowChar = input.charAt(1);
+
+        // Convert the column character to a number (assuming 'a' to 'h' maps to 1 to 8)
+        int column = columnChar - 'a' + 1;
+
+        // Convert the row character to a number (assuming '1' to '8')
+        int row = Character.getNumericValue(rowChar);
+
+        if (column < 1 || column > 8 || row < 1 || row > 8) {
+            throw new IllegalArgumentException("Input must be within the range 'a1' to 'h8'.");
+        }
+
+        return new ChessPosition(row, column);
+    }
+
     public String makeMove(String... params) throws ResponseException, Exception {
         if (params.length >= 2) {
             String fromPos = params[0];
             String toPos = params[1];
+            ChessPiece.PieceType promotion;
+            if (params.length == 2) {
+                promotion = null;
+            }
+            else{
+                promotion = switch (params[2].toLowerCase()){
+                    case "queen", "q" -> ChessPiece.PieceType.QUEEN;
+                    case "rook", "r" -> ChessPiece.PieceType.ROOK;
+                    case "bishop", "b" -> ChessPiece.PieceType.BISHOP;
+                    case "knight", "k" -> ChessPiece.PieceType.KNIGHT;
+                    default -> throw new IllegalArgumentException(String.format("'%s' is an invalid promotion piece", params[2]));
+                };
+            }
 //            ws = new WebSocketFacade(serverUrl, notificationHandler);
 //            ws.enterPetShop(username);
-
-            // Do the move
-            // print the new board
-            // Print the move to everyone else
+            currentGame.makeMove(new ChessMove(convertToPos(fromPos), convertToPos(toPos), promotion));
+            // update the board
+            // Print the board for everyone
             // If in check/mate/stalemate, notifiy the others
             return String.format("Move made: get rid of this %s", username);
         }
         throw new ResponseException(400, "Expected: (M)ake <beginning position> <ending position>");
     }
 
+    private ArrayList<ChessPosition> getHighlightPos(ArrayList<ChessMove> moves){
+        ArrayList<ChessPosition> positions = new ArrayList<>();
+        positions.add(moves.getFirst().getStartPosition());
+        for(var move : moves){
+            positions.add(move.getEndPosition());
+        }
+        return positions;
+    }
+
     public String highlight(String... params) throws ResponseException, Exception {
         if (params.length >= 1) {
             String piecePos = params[0];
-//            ws = new WebSocketFacade(serverUrl, notificationHandler);
-//            ws.enterPetShop(username);
-
-            // Validate the piece
-            // Collect the moves
-            // Print the highlighted board
+            ChessPosition position;
+            try{
+                position = convertToPos(piecePos);
+            }
+            catch(IllegalArgumentException e){
+                throw new IllegalArgumentException(e.getMessage());
+            }
+            if(currentGame.getBoard().getPiece(position) == null){
+                throw new IllegalArgumentException(String.format("There is no piece on position %s", position));
+            }
+            ArrayList<ChessMove> allMoves = (ArrayList<ChessMove>) currentGame.validMoves(position);
+            ChessBoard.printBoard(currentGame, getHighlightPos(allMoves));
             return "Highlighted";
         }
         throw new ResponseException(400, "Expected: (H)ighlight <position>");
@@ -277,10 +330,12 @@ public class ChessClient {
             return """
                 Type...
                     'Redraw' or 'R': Redraws the board
+                    'Move' or 'M': type a starting and ending position
+                        where you'd like to move a piece
                     'Highlight' or 'Hi': type a position where you'd
-                        like to see the possible moves for a piece.
+                        like to see the possible moves for a piece
                     'Leave' or 'L': Leave the game (you can rejoin later,
-                    or someone else can take your place.
+                    or someone else can take your place
                     'Resign' or 'Q': Resign the game. Better luck next time!
                     'Help' or 'H': Show possible actions
                 """;
