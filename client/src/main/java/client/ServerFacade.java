@@ -29,7 +29,7 @@ public class ServerFacade {
     }
 
     public GameData createGame(String gameName, String authToken) throws Exception {
-        GameData game = new GameData(0, null, null, gameName, null);
+        GameData game = new GameData(0, null, null, gameName, null, false);
         return makeRequest("POST", "/game", game, GameData.class, authToken);
     }
 

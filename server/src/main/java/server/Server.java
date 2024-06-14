@@ -13,7 +13,7 @@ import service.AuthService;
 import service.GameService;
 import service.UserService;
 import spark.*;
-import websocket.WebSocketHandler;
+//import websocket.WebSocketHandler;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -23,7 +23,7 @@ public class Server {
     GameService gService;
     UserService uService;
     AuthService aService;
-    WebSocketHandler wService;
+//    WebSocketHandler wService;
 
     public Server(){
         try{
@@ -32,7 +32,7 @@ public class Server {
         gService = new GameService();
         uService = new UserService();
         aService = new AuthService();
-        wService = new WebSocketHandler();
+//        wService = new WebSocketHandler();
         }
         catch(Exception e){
         System.out.println("The Server failed to start up");
@@ -53,7 +53,7 @@ public class Server {
         Spark.get("/game", this::listGameHandler);
         Spark.post("/game", this::createGameHandler);
         Spark.put("/game", this::joinGameHandler);
-        Spark.webSocket("/ws", new WebSocketHandler());
+//        Spark.webSocket("/ws", new WebSocketHandler());
 
         Spark.awaitInitialization();
         return Spark.port();

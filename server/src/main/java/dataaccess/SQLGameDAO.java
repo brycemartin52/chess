@@ -36,10 +36,10 @@ public class SQLGameDAO implements GameDAOInterface {
 
     @Override
     public int createGame(String gameName) throws DataAccessException {
-        var statement = "INSERT INTO gameData (gameName, game) VALUES (?, ?);";
+        var statement = "INSERT INTO gameData (gameName, game, finished) VALUES (?, ?, ?);";
         ChessGame newGame = new ChessGame();
         String gameJson = gSerializer.chessGameSerializer(newGame);
-        return executeUpdate(statement, gameName, gameJson);
+        return executeUpdate(statement, gameName, gameJson, false);
     }
 
     private GameData readGame(ResultSet rs) throws SQLException {
@@ -111,6 +111,7 @@ public class SQLGameDAO implements GameDAOInterface {
                     if (param instanceof String p) ps.setString(i + 1, p);
                     else if (param instanceof Integer p) ps.setInt(i + 1, p);
                     else if (param instanceof ChessGame p) ps.setString(i + 1, p.toString());
+                    else if (param instanceof Boolean p) ps.setBoolean(i + 1, p);
                     else if (param == null) ps.setNull(i + 1, NULL);
                 }
                 ps.executeUpdate();

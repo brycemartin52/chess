@@ -158,7 +158,7 @@ public class DatabaseUnitTests {
         try{
             int testID = gdao.createGame("New Game");
             GameData gData = gdao.getGame(testID);
-            GameData newGData = new GameData(testID, "username", "username2", "New Game", gData.game());
+            GameData newGData = new GameData(testID, "username", "username2", "New Game", gData.game(), false);
             gdao.updateGame(newGData);
             GameData finalGData = gdao.getGame(testID);
             Assertions.assertNotEquals(gData, finalGData);
@@ -176,7 +176,7 @@ public class DatabaseUnitTests {
         try{
             int testID = gdao.createGame("New Game");
             GameData gData = gdao.getGame(testID);
-            GameData newGData = new GameData(1, "username", "username2", "Other Game", gData.game());
+            GameData newGData = new GameData(1, "username", "username2", "Other Game", gData.game(), false);
             gdao.updateGame(newGData);
             GameData finalGData = gdao.getGame(testID);
             Assertions.assertNotEquals(gData, finalGData);
