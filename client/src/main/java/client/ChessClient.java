@@ -336,10 +336,10 @@ public class ChessClient implements NotificationHandler{
         GameData game = currentGameData;
         GameData updatedGame;
         if(username.equals(game.whiteUsername())){
-            updatedGame = new GameData(game.gameID(), null, game.blackUsername(), game.gameName(), game.game());
+            updatedGame = new GameData(game.gameID(), null, game.blackUsername(), game.gameName(), game.game(), game.finished());
         }
         else{
-            updatedGame = new GameData(game.gameID(), game.whiteUsername(), null, game.gameName(), game.game());
+            updatedGame = new GameData(game.gameID(), game.whiteUsername(), null, game.gameName(), game.game(), game.finished());
         }
         // Update the game in the DataBase
         //Notify the other player of the leaving
@@ -395,6 +395,6 @@ public class ChessClient implements NotificationHandler{
 
     @Override
     public void notify(ServerMessage notification) {
-
+        notification.getServerMessageType();
     }
 }

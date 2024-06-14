@@ -104,30 +104,18 @@ public class ChessBoard {
 
                 if ((boardCol + row)%2 == 0){
                     if(hiCoordinates != null && hiCoordinates.contains(pos)){
-                        if(hiCoordinates.getFirst().equals(pos)){
-                            setYellow(out);
-                        }
-                        else{
-                            setHighlightedWhite(out);
-                        }
+                        if(hiCoordinates.getFirst().equals(pos)){setYellow(out);}
+                        else{setHighlightedWhite(out);}
                     }
-                    else{
-                        setWhite(out);
-                    }
+                    else{setWhite(out);}
 
                 }
                 else{
                     if(hiCoordinates != null && hiCoordinates.contains(pos)){
-                        if(hiCoordinates.getFirst().equals(pos)){
-                            setYellow(out);
-                        }
-                        else{
-                            setHighlightedBlack(out);
-                        }
+                        if(hiCoordinates.getFirst().equals(pos)){setYellow(out);}
+                        else{setHighlightedBlack(out);}
                     }
-                    else{
-                        setBlack(out);
-                    }
+                    else{setBlack(out);}
                 }
                 printPlayer(out, board.getPiece(pos));
 
@@ -191,7 +179,5 @@ public class ChessBoard {
             };
             out.print(pieceType);
         }
-
-
     }
 }
