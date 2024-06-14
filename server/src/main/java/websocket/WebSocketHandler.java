@@ -1,5 +1,6 @@
 package websocket;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
 import gson.GsonSerializer;
 import org.eclipse.jetty.websocket.api.Session;
@@ -26,13 +27,20 @@ public class WebSocketHandler{
     }
 
     @OnWebSocketMessage
-    public void onMessage(Session session, String message, String username, int gameID) throws IOException {
-        UserGameCommand gameCommand = new Gson().fromJson(message, UserGameCommand.class);
-        switch (gameCommand.getCommandType()) {
-            case CONNECT -> connect(gameCommand.getAuthString(), session, gameID);
-            case MAKE_MOVE -> makeMove(gameCommand.getAuthString(), session, gameID);
-            case LEAVE -> leave(username, session, gameID);
-            case RESIGN -> resign(username, gameID);
+    public void onMessage(Session session, String message, String username, int gameID, ChessGame.TeamColor team) throws IOException {
+        UserGameCommand gameCommand = gsonSerializer.serverMessageDeserializer(message);
+        try{
+            switch (gameCommand.getCommandType()) {
+                case CONNECT -> connect(gameCommand.getAuthString(), session, gameID, team);
+                case MAKE_MOVE -> makeMove(gameCommand.getAuthString(), session, gameID);
+                case LEAVE -> leave(username, session, gameID);
+                case RESIGN -> resign(username, gameID);
+            }
+        }
+        catch(IOException e){
+            var errorMessage = String.format("Calling 'onMessage' with the message '%s' gave the following error: %n%s", message, e.getMessage());
+            var joinerNotification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, errorMessage);
+            send(session, gsonSerializer.messageSerializer(joinerNotification));
         }
     }
 
@@ -42,13 +50,38 @@ public class WebSocketHandler{
 
     public void broadcast(int gameID, ServerMessage notification) throws IOException {
         var gameSessions = sessions.getSessionsForGame(gameID);
+        HashSet<Session> toRemove = new HashSet<>();
+
         for (var session : gameSessions) {
-            send(session, notification.toString());
+            if(session.isOpen()){
+                send(session, gsonSerializer.messageSerializer(notification));
+            }
+            else{toRemove.add(session);}
+
+        }
+
+        for (var session : toRemove){
+            sessions.removeSessionFromGame(gameID, session);
         }
     }
 
-    private void connect(String authString, Session session, int gameID) {
+    private void connect(String username, Session session, int gameID, ChessGame.TeamColor teamColor) throws IOException {
+        String team = switch (teamColor){
+            case WHITE -> "White";
+            case BLACK -> "Black";
+            case null -> "an observer";
+        };
 
+        // Send the message to everyone else
+        var message = String.format("%s joined the game as %s", username, team);
+        var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
+        broadcast(gameID, notification);
+
+        // Add the session, message the joiner
+        sessions.addSessionToGame(gameID, session);
+        var joinerMessage = String.format("You joined the game as %s", team);
+        var joinerNotification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, joinerMessage);
+        send(session, gsonSerializer.messageSerializer(joinerNotification));
     }
 
     private void makeMove(String authString, Session session, int gameID) {

@@ -8,6 +8,7 @@ import model.AuthData;
 import model.GameData;
 import model.JoinGameData;
 import model.UserData;
+import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
 public class GsonSerializer {
@@ -35,4 +36,5 @@ public class GsonSerializer {
         return serializer.fromJson(game, GameData.class);
     }
     public ChessGame chessGameDeserializer(String game) {return serializer.fromJson(game, ChessGame.class);}
+    public UserGameCommand serverMessageDeserializer(String message) {return serializer.fromJson(message, UserGameCommand.class);}
 }

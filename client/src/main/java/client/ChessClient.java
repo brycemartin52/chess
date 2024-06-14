@@ -347,7 +347,10 @@ public class ChessClient implements NotificationHandler{
     }
 
     public String resign() throws Exception {
-        leaveGame();
+        GameData game = currentGameData;
+        GameData updatedGame = new GameData(game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName(), game.game(), true);
+
+        //update game in the database
 
         return "Resigned. Better luck next time!";
     }
