@@ -24,13 +24,11 @@ public class ChessClient implements NotificationHandler{
     private boolean inGame;
     private GameData currentGameData;
     private ChessGame.TeamColor team;
-//    private final NotificationHandler notificationHandler;
     private WebSocketFacade ws;
 
     public ChessClient(String serverUrl) {
         server = new ServerFacade(serverUrl);
         this.serverUrl = serverUrl;
-//        this.notificationHandler = notificationHandler;
     }
 
     public String eval(String input){
@@ -186,17 +184,12 @@ public class ChessClient implements NotificationHandler{
             };
             this.team = team;
             server.playGame(team, gameID, authToken);
-            HashSet<GameData> games = getGames();
-            for(var game : games){
-                if(game.gameID() == gameID){
-                    ChessBoard.printBoard(game.game(), null);
-                    currentGameData = game;
-                    break;
-                }
-            }
             inGame = true;
-            UserGameCommand data = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, currentGameData.gameID(), null);
+            UserGameCommand data = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID, null);
+            WebSocketFacade ws = new WebSocketFacade(this, serverUrl);
             ws.update(data, authToken);
+            currentGameData = getGame(gameID);
+            ChessBoard.printBoard(currentGameData.game(), null);
             return "Joined Game";
         }
         throw new ResponseException(400, "Expected: (P)lay <(W)HITE or (B)LACK> <gameID>");
@@ -207,6 +200,7 @@ public class ChessClient implements NotificationHandler{
         if (params.length >= 1) {
             int gameID = Integer.parseInt((String) params[0]);
             UserGameCommand data = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, currentGameData.gameID(), null);
+            WebSocketFacade ws = new WebSocketFacade(this, serverUrl);
             ws.update(data, authToken);
             ChessBoard.main(new String[0]);
             inGame = true;
@@ -248,24 +242,12 @@ public class ChessClient implements NotificationHandler{
                     default -> throw new IllegalArgumentException(String.format("'%s' is an invalid promotion piece", params[2]));
                 };
             }
-            if(currentGameData.game().getBoard().getPiece(fromPos).getTeamColor() != team){
-                throw new IllegalArgumentException("That's not your team! Nice try though.");
-            }
-            if(currentGameData.game().getTeamTurn() != team){
-                throw new IllegalArgumentException("That's not your turn! Nice try though.");
-            }
+
             ChessMove attemptedMove = new ChessMove(fromPos, toPos, promotion);
-            if(!currentGameData.game().validMoves(fromPos).contains(attemptedMove)){
-                return String.format("Invalid move: '%s' to '%s'", fromPos, toPos);
-            }
-            currentGameData.game().makeMove(attemptedMove);
+            UserGameCommand data = new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, currentGameData.gameID(), attemptedMove);
+            WebSocketFacade ws = new WebSocketFacade(this, serverUrl);
+            ws.update(data, authToken);
             ChessBoard.printBoard(currentGameData.game(),null);
-            if (currentGameData.game().isInCheckmate(ChessGame.TeamColor.WHITE) || currentGameData.game().isInCheckmate(ChessGame.TeamColor.BLACK) ||
-                currentGameData.game().isInStalemate(ChessGame.TeamColor.WHITE) || currentGameData.game().isInStalemate(ChessGame.TeamColor.BLACK)){
-                GameData game = currentGameData;
-                UserGameCommand data = new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, currentGameData.gameID(), attemptedMove);
-                ws.update(data, authToken);
-            }
             return "Move made: check if the database is updated";
         }
         throw new ResponseException(400, "Expected: (M)ake <beginning position> <ending position>");
@@ -308,6 +290,7 @@ public class ChessClient implements NotificationHandler{
         team = null;
         inGame = false;
         UserGameCommand data = new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, currentGameData.gameID(), null);
+        WebSocketFacade ws = new WebSocketFacade(this, serverUrl);
         ws.update(data, authToken);
         // Update the game in the DataBase
         //Notify the other player of the leaving
@@ -315,11 +298,9 @@ public class ChessClient implements NotificationHandler{
     }
 
     public String resign() throws Exception {
-        GameData game = currentGameData;
-        GameData updatedGame = new GameData(game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName(), game.game(), true);
-
         //update game in the database
         UserGameCommand data = new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, currentGameData.gameID(), null);
+        WebSocketFacade ws = new WebSocketFacade(this, serverUrl);
         ws.update(data, authToken);
 
         return "Resigned. Better luck next time!";

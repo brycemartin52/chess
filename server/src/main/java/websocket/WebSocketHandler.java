@@ -2,18 +2,16 @@ package websocket;
 
 import chess.ChessGame;
 import chess.ChessMove;
+import chess.ChessPosition;
+import chess.InvalidMoveException;
 import dataaccess.DataAccessException;
 import dataaccess.SQLAuthDAO;
 import dataaccess.SQLGameDAO;
-import dataaccess.SQLUserDAO;
 import gson.GsonSerializer;
 import model.GameData;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
-import service.AuthService;
-import service.GameService;
-import service.UserService;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
@@ -29,7 +27,6 @@ public class WebSocketHandler {
     private final GsonSerializer gsonSerializer;
     private SQLAuthDAO adao;
     private SQLGameDAO gdao;
-    private SQLUserDAO udao;
 
     String authToken;
     String username;
@@ -42,7 +39,6 @@ public class WebSocketHandler {
         try{
             adao = new SQLAuthDAO();
             gdao = new SQLGameDAO();
-            udao = new SQLUserDAO();
         }
         catch(DataAccessException e){
             System.out.println("Unable to initialize wsHandler DAOs");
@@ -50,7 +46,7 @@ public class WebSocketHandler {
     }
 
     @OnWebSocketMessage
-    public void onMessage(Session session, String ugc) throws IOException {
+    public void onMessage(Session session, String ugc) {
         UserGameCommand body = gsonSerializer.commandDeserializer(ugc);
         try{
             authToken = body.getAuthString();
@@ -59,73 +55,113 @@ public class WebSocketHandler {
             if (Objects.equals(username, game.whiteUsername())) {team = ChessGame.TeamColor.WHITE;}
             else if (Objects.equals(username, game.blackUsername())) {team = ChessGame.TeamColor.BLACK;}
             else {team = null;}
+            try{
+                switch (body.getCommandType()) {
+                    case CONNECT -> connect(username, session, game.gameID());
+                    case MAKE_MOVE -> makeMove(username, session, game, body.getMove());
+                    case LEAVE -> leave(username, session, game.gameID());
+                    case RESIGN -> resign(username, game.gameID());
+                }
+            }
+            catch(IOException e){
+                var errorMessage = String.format("Calling 'onMessage' with the message gave the following error: %n%s", e.getMessage());
+                var joinerNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, "IOException error", errorMessage);
+                send(session, gsonSerializer.messageSerializer(joinerNotification));
+            }
+            catch(InvalidMoveException e){
+                String errorMessage = "InvalidMoveException error:" + e.getMessage();
+                var joinerNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null, errorMessage);
+                send(session, gsonSerializer.messageSerializer(joinerNotification));
+            }
+            catch (IllegalArgumentException e){
+                String errorMessage = "IllegalArgumentException error:" + e.getMessage();
+                var joinerNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null, errorMessage);
+                send(session, gsonSerializer.messageSerializer(joinerNotification));
+            }
         }
         catch(DataAccessException e){
-            System.out.println("There was a problem initializing the onMessage\n"+e.getMessage());
+            String errorMessage = "DataAccessException error:" + e.getMessage();
+            var joinerNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null, errorMessage);
+            send(session, gsonSerializer.messageSerializer(joinerNotification));
         }
+        catch(NullPointerException e){
+            String errorMessage = "Nullptr error:" + e.getMessage();
+            var joinerNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null, errorMessage);
+            send(session, gsonSerializer.messageSerializer(joinerNotification));
+        }
+    }
 
+    public void send(Session session , String msg){
         try{
-            switch (body.getCommandType()) {
-                case CONNECT -> connect(username, session, game.gameID(), team);
-                case MAKE_MOVE -> makeMove(username, session, game, body.getMove());
-                case LEAVE -> leave(username, session, game.gameID());
-                case RESIGN -> resign(username, session, game.gameID());
-            }
+            session.getRemote().sendString(msg);
         }
         catch(IOException e){
-            var errorMessage = String.format("Calling 'onMessage' with the message gave the following error: %n%s", e.getMessage());
-            var joinerNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, errorMessage);
-            send(session, gsonSerializer.messageSerializer(joinerNotification));
+            System.out.println("Unable to sent the message:\n" + e.getMessage());
         }
-        catch(DataAccessException e){
-            String errorMessage = e.getMessage();
 
-            var joinerNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, errorMessage);
-            send(session, gsonSerializer.messageSerializer(joinerNotification));
-        }
     }
 
-    public void send(Session session , String msg) throws IOException {
-        session.getRemote().sendString(msg);
-    }
-
-    public void broadcast(int gameID, ServerMessage notification, Session exclusionarySession) throws IOException {
+    public void broadcast(int gameID, ServerMessage notification, Session exclusionarySession){
         var gameSessions = sessions.getSessionsForGame(gameID);
-        HashSet<Session> toRemove = new HashSet<>();
+        if(gameSessions != null){
+            HashSet<Session> toRemove = new HashSet<>();
 
-        for (var session : gameSessions) {
-            if(session.isOpen() && !session.equals(exclusionarySession)){
-                send(session, gsonSerializer.messageSerializer(notification));
+            for (var session : gameSessions) {
+                if(session.isOpen()){
+                    if(!session.equals(exclusionarySession)){
+                        send(session, gsonSerializer.messageSerializer(notification));
+                    }
+                }
+                else{toRemove.add(session);}
             }
-            else{toRemove.add(session);}
-        }
 
-        for (var session : toRemove){
-            sessions.removeSessionFromGame(gameID, session);
+            for (var session : toRemove){
+                sessions.removeSessionFromGame(gameID, session);
+            }
         }
     }
 
-    private void connect(String username, Session session, int gameID, ChessGame.TeamColor teamColor) throws IOException {
-        String team = switch (teamColor){
+    private void connect(String username, Session session, int gameID) throws IOException {
+        String teamColor = switch (team){
             case WHITE -> "White";
             case BLACK -> "Black";
             case null -> "an observer";
         };
 
+        sessions.addSessionToGame(gameID, session);
+        ServerMessage joinerNotification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, game);
+        send(session, gsonSerializer.messageSerializer(joinerNotification));
+
         // Send the message to everyone else
-        var message = String.format("%s joined the game as %s", username, team);
+        var message = String.format("%s joined the game as %s", username, teamColor);
         var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
         broadcast(gameID, notification, session);
-
-        // Add the session, message the joiner
-        sessions.addSessionToGame(gameID, session);
-        var joinerMessage = String.format("You joined the game as %s", team);
-        var joinerNotification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, joinerMessage);
-        send(session, gsonSerializer.messageSerializer(joinerNotification));
     }
 
-    private void makeMove(String username, Session session, GameData game, ChessMove move) throws IOException, DataAccessException {
+    private void makeMove(String username, Session session, GameData game, ChessMove move) throws IOException, DataAccessException, InvalidMoveException {
+        ChessPosition fromPos = move.getStartPosition();
+        ChessPosition toPos = move.getEndPosition();
+        if (game.finished() || game.game().isInCheckmate(ChessGame.TeamColor.WHITE) || game.game().isInCheckmate(ChessGame.TeamColor.BLACK) ||
+                game.game().isInStalemate(ChessGame.TeamColor.WHITE) || game.game().isInStalemate(ChessGame.TeamColor.BLACK)
+        ){
+            throw new IllegalArgumentException("Game's over folks!");
+        }
+        if(game.game().getBoard().getPiece(fromPos).getTeamColor() != team){
+            throw new IllegalArgumentException("That's not your team! Nice try though.");
+        }
+        if(game.game().getTeamTurn() != team){
+            throw new IllegalArgumentException("That's not your turn! Nice try though.");
+        }
+
+        if(!game.game().validMoves(fromPos).contains(move)){
+            throw new IllegalArgumentException(String.format("Invalid move: '%s' to '%s'", fromPos, toPos));
+        }
+        game.game().makeMove(move);
         gdao.updateGame(game);
+
+
+        ServerMessage joinerNotification = new ServerMessage(ServerMessage.ServerMessageType.LOAD_GAME, game);
+        broadcast(game.gameID(), joinerNotification, null);
 
         var message = String.format("%s moved from %s to %s", username, move.getStartPosition(), move.getEndPosition());
         var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
@@ -148,9 +184,18 @@ public class WebSocketHandler {
         broadcast(gameID, notification, session);
     }
 
-    private void resign(String username, Session session, int gameID) throws IOException {
+    private void resign(String username, int gameID) throws IOException, DataAccessException {
+        if(team == null){
+            throw new IllegalArgumentException("You're an observer silly, you don't resign.");
+        }
+        if(game.finished()){
+            throw new IllegalArgumentException("Game's already finished ya goon.");
+        }
+
+        GameData updatedGame = new GameData(game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName(), game.game(), true);
+        gdao.updateGame(updatedGame);
         var message = String.format("%s resigned", username);
         var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
-        broadcast(gameID, notification, session);
+        broadcast(gameID, notification, null);
     }
 }
