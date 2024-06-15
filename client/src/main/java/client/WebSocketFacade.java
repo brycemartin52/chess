@@ -27,10 +27,10 @@ public class WebSocketFacade {
 //        return makeRequest("WEBSOCKET", "/ws", user, AuthData.class, null);
 //    }
 //
-//    public AuthData makeMove(String username, String password, String email) throws Exception {
-//        UserData user = new UserData(username, password, email);
-//        return makeRequest("POST", "/user", user, AuthData.class, null);
-//    }
+    public GameData makeMove(String username, String password, String email, GameData newGame) throws Exception {
+        UserData user = new UserData(username, password, email);
+        return makeRequest("WEBSOCKET", "/ws", newGame, GameData.class, null);
+    }
 //
 //    public GameData resign(String gameName, String authToken) throws Exception {
 //        GameData game = new GameData(0, null, null, gameName, null, false);

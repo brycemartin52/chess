@@ -21,6 +21,7 @@ public class ChessClient implements NotificationHandler{
     private boolean loggedIn;
     private boolean inGame;
     private GameData currentGameData;
+    private ChessGame.TeamColor team;
 //    private final NotificationHandler notificationHandler;
     private WebSocketFacade ws;
 
@@ -182,7 +183,7 @@ public class ChessClient implements NotificationHandler{
             };
 //            ws = new WebSocketFacade(serverUrl, notificationHandler);
 //            ws.enterPetShop(username);
-
+            this.team = team;
             server.playGame(team, gameID, authToken);
             HashSet<GameData> games = getGames();
             for(var game : games){
@@ -244,6 +245,9 @@ public class ChessClient implements NotificationHandler{
                     default -> throw new IllegalArgumentException(String.format("'%s' is an invalid promotion piece", params[2]));
                 };
             }
+            if(currentGameData.game().getTeamTurn() != team){
+                throw new IllegalArgumentException("That's not your team! Nice try though.");
+            }
 //            ws = new WebSocketFacade(serverUrl, notificationHandler);
 //            ws.enterPetShop(username);
             ChessMove attemptedMove = new ChessMove(fromPos, toPos, promotion);
@@ -258,7 +262,7 @@ public class ChessClient implements NotificationHandler{
                 GameData updatedGame = new GameData(game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName(), game.game(), true);
                 // Update game in database
             }
-            return String.format("Move made: get rid of this %s", username);
+            return "Move made: check if the database is updated";
         }
         throw new ResponseException(400, "Expected: (M)ake <beginning position> <ending position>");
     }
@@ -292,15 +296,20 @@ public class ChessClient implements NotificationHandler{
         throw new ResponseException(400, "Expected: (H)ighlight <position>");
     }
 
+    private void updateGame(GameData newGame){
+
+    }
+
     public String leaveGame() throws Exception {
         GameData game = currentGameData;
         GameData updatedGame;
-        if(username.equals(game.whiteUsername())){
+        if(team == ChessGame.TeamColor.WHITE){
             updatedGame = new GameData(game.gameID(), null, game.blackUsername(), game.gameName(), game.game(), game.finished());
         }
         else{
             updatedGame = new GameData(game.gameID(), game.whiteUsername(), null, game.gameName(), game.game(), game.finished());
         }
+        team = null;
         // Update the game in the DataBase
         //Notify the other player of the leaving
         return "Game left";
