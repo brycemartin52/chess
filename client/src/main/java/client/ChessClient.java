@@ -187,7 +187,7 @@ public class ChessClient implements NotificationHandler{
             inGame = true;
             UserGameCommand data = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, gameID, null);
             WebSocketFacade ws = new WebSocketFacade(this, serverUrl);
-            ws.update(data, authToken);
+            ws.update(data);
             currentGameData = getGame(gameID);
             ChessBoard.printBoard(currentGameData.game(), null);
             return "Joined Game";
@@ -201,7 +201,7 @@ public class ChessClient implements NotificationHandler{
             int gameID = Integer.parseInt((String) params[0]);
             UserGameCommand data = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, currentGameData.gameID(), null);
             WebSocketFacade ws = new WebSocketFacade(this, serverUrl);
-            ws.update(data, authToken);
+            ws.update(data);
             ChessBoard.main(new String[0]);
             inGame = true;
             return "Joined Game";
@@ -246,7 +246,7 @@ public class ChessClient implements NotificationHandler{
             ChessMove attemptedMove = new ChessMove(fromPos, toPos, promotion);
             UserGameCommand data = new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, currentGameData.gameID(), attemptedMove);
             WebSocketFacade ws = new WebSocketFacade(this, serverUrl);
-            ws.update(data, authToken);
+            ws.update(data);
             ChessBoard.printBoard(currentGameData.game(),null);
             return "Move made: check if the database is updated";
         }
@@ -287,14 +287,14 @@ public class ChessClient implements NotificationHandler{
         inGame = false;
         UserGameCommand data = new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, currentGameData.gameID(), null);
         WebSocketFacade ws = new WebSocketFacade(this, serverUrl);
-        ws.update(data, authToken);
+        ws.update(data);
         return "Game left";
     }
 
     public String resign() throws Exception {
         UserGameCommand data = new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, currentGameData.gameID(), null);
         WebSocketFacade ws = new WebSocketFacade(this, serverUrl);
-        ws.update(data, authToken);
+        ws.update(data);
 
         return "Resigned. Better luck next time!";
     }

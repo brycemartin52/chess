@@ -144,7 +144,7 @@ public class ServiceUnitTests {
         try{
             AuthData authData = userService.register(user);
             boolean success = userService.logout("badAuthToken");
-            Assertions.assertTrue(success);
+            Assertions.assertFalse(success);
         }
         catch (DataAccessException e){
             System.out.println("Doesn't work");
