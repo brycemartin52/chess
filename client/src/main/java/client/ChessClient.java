@@ -50,13 +50,22 @@ public class ChessClient implements NotificationHandler{
                         default -> "Unknown command\n";
                     };
                 }
-                else{
+                else if(team != null){
                     return switch (cmd) {
                         case "help", "h" -> help();
                         case "redraw", "r" -> ChessBoard.printBoard(currentGameData.game(), null);
                         case "leave", "l" -> leaveGame();
                         case "resign", "q" -> resign();
                         case "move", "m" -> makeMove(params);
+                        case "highlight", "hi" -> highlight(params);
+                        default -> "Unknown command\n";
+                    };
+                }
+                else{
+                    return switch (cmd) {
+                        case "help", "h" -> help();
+                        case "redraw", "r" -> ChessBoard.printBoard(currentGameData.game(), null);
+                        case "leave", "l" -> leaveGame();
                         case "highlight", "hi" -> highlight(params);
                         default -> "Unknown command\n";
                     };
@@ -84,8 +93,6 @@ public class ChessClient implements NotificationHandler{
             if (!email.contains("@")) {
                 return "Must be a valid email";
             }
-//            ws = new WebSocketFacade(serverUrl, notificationHandler);
-//            ws.enterPetShop(username);
             AuthData aData = server.register(attemptedUsername, password, email);
             if(aData == null){
                 return String.format("Sorry, but it looks like the username '%s' is already taken.", attemptedUsername);
@@ -103,8 +110,6 @@ public class ChessClient implements NotificationHandler{
         if (params.length >= 2) {
             username = params[0];
             String password = params[1];
-//            ws = new WebSocketFacade(serverUrl, notificationHandler);
-//            ws.enterPetShop(username);
             AuthData aData = server.login(username, password);
             if(aData == null || aData.authToken() == null){
                 username = null;
@@ -120,8 +125,6 @@ public class ChessClient implements NotificationHandler{
 
     public String logout() throws ResponseException, Exception {
         assertSignedIn();
-//        ws.leavePetShop(visitorName);
-//        ws = null;
         server.logout(authToken);
         String message = String.format("See you next time, %s.", username);
         username = null;
@@ -165,8 +168,6 @@ public class ChessClient implements NotificationHandler{
         assertSignedIn();
         if (params.length >= 1) {
             String gameName = params[0];
-//            ws = new WebSocketFacade(serverUrl, notificationHandler);
-//            ws.enterPetShop(username);
             server.createGame(gameName, authToken);
             return "Game Created";
         }
@@ -304,14 +305,6 @@ public class ChessClient implements NotificationHandler{
     }
 
     public String leaveGame() throws Exception {
-        GameData game = currentGameData;
-        GameData updatedGame;
-        if(team == ChessGame.TeamColor.WHITE){
-            updatedGame = new GameData(game.gameID(), null, game.blackUsername(), game.gameName(), game.game(), game.finished());
-        }
-        else{
-            updatedGame = new GameData(game.gameID(), game.whiteUsername(), null, game.gameName(), game.game(), game.finished());
-        }
         team = null;
         inGame = false;
         UserGameCommand data = new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, currentGameData.gameID(), null);
@@ -333,7 +326,7 @@ public class ChessClient implements NotificationHandler{
     }
 
     public String help() {
-        return ClientMenu.displayHelpMenu(loggedIn, inGame);
+        return ClientMenu.displayHelpMenu(loggedIn, inGame, team);
     }
 
     public void displayMenu(){

@@ -1,5 +1,7 @@
 package client;
 
+import chess.ChessGame;
+
 public class ClientMenu {
 
     public static void displayMenu(boolean loggedIn, boolean inGame){
@@ -29,7 +31,7 @@ public class ClientMenu {
         }
     }
 
-    public static String displayHelpMenu(boolean loggedIn, boolean inGame) {
+    public static String displayHelpMenu(boolean loggedIn, boolean inGame, ChessGame.TeamColor team) {
         if (!loggedIn) {
             return """
                 Type...
@@ -40,7 +42,8 @@ public class ClientMenu {
                 """;
         }
         else if(inGame){
-            return """
+            if(team != null){
+                return """
                 Type...
                     'Redraw' or 'R': Redraws the board
                     'Move' or 'M': type a starting and ending position
@@ -52,6 +55,18 @@ public class ClientMenu {
                     'Resign' or 'Q': Resign the game. Better luck next time!
                     'Help' or 'H': Show possible actions
                 """;
+            }
+
+            return """
+                Type...
+                    'Redraw' or 'R': Redraws the board
+                    'Highlight' or 'Hi': type a position where you'd
+                        like to see the possible moves for a piece
+                    'Leave' or 'L': Leave the game (you can rejoin later,
+                        or someone else can take your place
+                    'Help' or 'H': Show possible actions
+                """;
+
         }
         return """
                 Type...

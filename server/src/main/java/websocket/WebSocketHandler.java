@@ -132,7 +132,15 @@ public class WebSocketHandler {
         broadcast(game.gameID(), notification, session);
     }
 
-    private void leave(String username, Session session, int gameID) throws IOException {
+    private void leave(String username, Session session, int gameID) throws IOException, DataAccessException {
+        if(team == ChessGame.TeamColor.WHITE){
+            GameData updatedGame = new GameData(game.gameID(), null, game.blackUsername(), game.gameName(), game.game(), game.finished());
+            gdao.updateGame(updatedGame);
+        }
+        else if (team == ChessGame.TeamColor.BLACK){
+            GameData updatedGame = new GameData(game.gameID(), game.whiteUsername(), null, game.gameName(), game.game(), game.finished());
+            gdao.updateGame(updatedGame);
+        }
         //Update the game here
         sessions.removeSessionFromGame(gameID, session);
         var message = String.format("%s left the game", username);
