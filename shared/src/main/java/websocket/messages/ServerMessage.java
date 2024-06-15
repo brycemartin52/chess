@@ -52,6 +52,8 @@ public class ServerMessage {
         return this.message;
     }
 
+    public String getErrorMessage(){return this.errorMessage;}
+
     @Override
     public boolean equals(Object o) {
         if (this == o)

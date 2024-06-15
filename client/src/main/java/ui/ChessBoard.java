@@ -36,7 +36,7 @@ public class ChessBoard {
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
         board = game.getBoard();
         hiCoordinates = highlightCoordinates;
-
+        out.print(RESET);
         out.print(ERASE_SCREEN);
 
         if(game.getTeamTurn() == ChessGame.TeamColor.WHITE){
