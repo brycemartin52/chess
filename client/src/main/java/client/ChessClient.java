@@ -12,8 +12,6 @@ import model.GameData;
 import model.ListGames;
 import ui.ChessBoard;
 import websocket.messages.ServerMessage;
-//import client.websocket.NotificationHandler;
-//import client.websocket.WebSocketFacade;
 
 public class ChessClient implements NotificationHandler{
     private String username;
@@ -24,7 +22,7 @@ public class ChessClient implements NotificationHandler{
     private boolean inGame;
     private GameData currentGameData;
 //    private final NotificationHandler notificationHandler;
-//    private WebSocketFacade ws;
+    private WebSocketFacade ws;
 
     public ChessClient(String serverUrl) {
         server = new ServerFacade(serverUrl);

@@ -35,6 +35,15 @@ public class GameService {
         return id;
     }
 
+    public GameData updateGame(String authToken, GameData updatedGame) throws DataAccessException{
+        AuthData authData = adao.getAuth(authToken);
+        if(authData == null){
+            throw new DataAccessException("Error: unauthorized");
+        }
+        gdao.updateGame(updatedGame);
+        return updatedGame;
+    }
+
     public GameData joinGame(String authToken, JoinGameData joinRequest) throws DataAccessException {
         AuthData authData = adao.getAuth(authToken);
         if(authData == null){
@@ -63,8 +72,7 @@ public class GameService {
             }
             newGameData = new GameData(game.gameID(), game.whiteUsername(), username, game.gameName(), game.game(), game.finished());
         }
-        gdao.updateGame(newGameData);
-        return newGameData;
+        return updateGame(authToken, newGameData);
     }
 
     public HashSet<GameData> listGames(String authToken) throws DataAccessException {

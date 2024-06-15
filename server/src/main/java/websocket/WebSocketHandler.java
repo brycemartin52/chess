@@ -1,17 +1,16 @@
 package websocket;
 
 import chess.ChessGame;
-import com.google.gson.Gson;
 import gson.GsonSerializer;
 import org.eclipse.jetty.websocket.api.Session;
-import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
+//import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
 import java.io.IOException;
-import java.util.HashMap;
+//import java.util.HashMap;
 import java.util.HashSet;
 
 
@@ -19,7 +18,7 @@ import java.util.HashSet;
 @WebSocket
 public class WebSocketHandler{
     private WebSocketSessions sessions;
-    private GsonSerializer gsonSerializer;
+    private final GsonSerializer gsonSerializer;
 
     public WebSocketHandler(){
         sessions = new WebSocketSessions();

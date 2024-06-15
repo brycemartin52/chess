@@ -1,13 +1,7 @@
 package client;
 
-import ui.EscapeSequences;
-
 import java.util.Scanner;
 import static ui.EscapeSequences.*;
-
-//import client.websocket.NotificationHandler;
-//import webSocketMessages.Notification;
-
 
 public class Repl {
     private final ChessClient client;
@@ -21,7 +15,7 @@ public class Repl {
 
         Scanner scanner = new Scanner(System.in);
         var result = "";
-        while (!result.equals("Quit")) {
+        while (result == null || !result.equals("Quit")) {
             printPrompt();
             String line = scanner.nextLine();
             try {
