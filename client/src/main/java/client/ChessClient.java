@@ -245,11 +245,12 @@ public class ChessClient implements NotificationHandler{
                     default -> throw new IllegalArgumentException(String.format("'%s' is an invalid promotion piece", params[2]));
                 };
             }
-            if(currentGameData.game().getTeamTurn() != team){
+            if(currentGameData.game().getBoard().getPiece(fromPos).getTeamColor() != team){
                 throw new IllegalArgumentException("That's not your team! Nice try though.");
             }
-//            ws = new WebSocketFacade(serverUrl, notificationHandler);
-//            ws.enterPetShop(username);
+            if(currentGameData.game().getTeamTurn() != team){
+                throw new IllegalArgumentException("That's not your turn! Nice try though.");
+            }
             ChessMove attemptedMove = new ChessMove(fromPos, toPos, promotion);
             if(!currentGameData.game().validMoves(fromPos).contains(attemptedMove)){
                 return String.format("Invalid move: '%s' to '%s'", fromPos, toPos);
@@ -261,6 +262,8 @@ public class ChessClient implements NotificationHandler{
                 GameData game = currentGameData;
                 GameData updatedGame = new GameData(game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName(), game.game(), true);
                 // Update game in database
+//                ws = new WebSocketFacade(serverUrl, notificationHandler);
+//            ws.enterPetShop(username);
             }
             return "Move made: check if the database is updated";
         }
@@ -310,6 +313,7 @@ public class ChessClient implements NotificationHandler{
             updatedGame = new GameData(game.gameID(), game.whiteUsername(), null, game.gameName(), game.game(), game.finished());
         }
         team = null;
+        inGame = false;
         // Update the game in the DataBase
         //Notify the other player of the leaving
         return "Game left";
