@@ -5,8 +5,10 @@ import chess.ChessMove;
 import dataaccess.DataAccessException;
 import gson.GsonSerializer;
 import model.GameData;
+import model.WebSocketData;
+import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.websocket.api.Session;
-//import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import service.GameService;
@@ -14,7 +16,6 @@ import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
 import java.io.IOException;
-//import java.util.HashMap;
 import java.util.HashSet;
 
 
@@ -32,18 +33,26 @@ public class WebSocketHandler{
     }
 
     @OnWebSocketMessage
-    public void onMessage(Session session, String message, String username, GameData game, ChessMove move, ChessGame.TeamColor team) throws IOException {
-        UserGameCommand gameCommand = gsonSerializer.serverMessageDeserializer(message);
+    public void onMessage(Request request, Response response) throws IOException {
+        WebSocketData body = gsonSerializer.wsDeserializer(request.body());
+
+        String authToken = request.getHeader("authorization");
+        String username = body.username();
+        Session session = (Session) request.getSession();
+        GameData game = body.game();
+        ChessGame.TeamColor team = body.team();
+        ChessMove move = body.move();
+        UserGameCommand.CommandType gameCommand = body.message();
         try{
-            switch (gameCommand.getCommandType()) {
-                case CONNECT -> connect(gameCommand.getAuthString(), session, game.gameID(), team);
-                case MAKE_MOVE -> makeMove(username, gameCommand.getAuthString(), session, game, move);
+            switch (gameCommand) {
+                case CONNECT -> connect(authToken, session, game.gameID(), team);
+                case MAKE_MOVE -> makeMove(username, authToken, session, game, move);
                 case LEAVE -> leave(username, session, game.gameID());
                 case RESIGN -> resign(username, session, game.gameID());
             }
         }
         catch(IOException e){
-            var errorMessage = String.format("Calling 'onMessage' with the message '%s' gave the following error: %n%s", message, e.getMessage());
+            var errorMessage = String.format("Calling 'onMessage' with the message '%s' gave the following error: %n%s", body.message(), e.getMessage());
             var joinerNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, errorMessage);
             send(session, gsonSerializer.messageSerializer(joinerNotification));
         }
@@ -114,6 +123,4 @@ public class WebSocketHandler{
         var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
         broadcast(gameID, notification, session);
     }
-
-
 }

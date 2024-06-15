@@ -10,7 +10,9 @@ import exception.ResponseException;
 import model.AuthData;
 import model.GameData;
 import model.ListGames;
+import model.WebSocketData;
 import ui.ChessBoard;
+import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
 public class ChessClient implements NotificationHandler{
@@ -261,9 +263,8 @@ public class ChessClient implements NotificationHandler{
                 currentGameData.game().isInStalemate(ChessGame.TeamColor.WHITE) || currentGameData.game().isInStalemate(ChessGame.TeamColor.BLACK)){
                 GameData game = currentGameData;
                 GameData updatedGame = new GameData(game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName(), game.game(), true);
-                // Update game in database
-//                ws = new WebSocketFacade(serverUrl, notificationHandler);
-//            ws.enterPetShop(username);
+                WebSocketData data = new WebSocketData(UserGameCommand.CommandType.MAKE_MOVE, username, updatedGame, attemptedMove, team);
+                ws.update(data, authToken);
             }
             return "Move made: check if the database is updated";
         }
@@ -314,6 +315,8 @@ public class ChessClient implements NotificationHandler{
         }
         team = null;
         inGame = false;
+        WebSocketData data = new WebSocketData(UserGameCommand.CommandType.LEAVE, username, updatedGame, null, team);
+        ws.update(data, authToken);
         // Update the game in the DataBase
         //Notify the other player of the leaving
         return "Game left";
@@ -324,6 +327,8 @@ public class ChessClient implements NotificationHandler{
         GameData updatedGame = new GameData(game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName(), game.game(), true);
 
         //update game in the database
+        WebSocketData data = new WebSocketData(UserGameCommand.CommandType.RESIGN, username, updatedGame, null, team);
+        ws.update(data, authToken);
 
         return "Resigned. Better luck next time!";
     }

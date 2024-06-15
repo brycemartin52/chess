@@ -23,23 +23,9 @@ public class WebSocketFacade {
         this.handler = handler;
     }
 
-//    public NotificationHandler connect(Session session, String message, String username, int gameID, ChessGame.TeamColor team) throws Exception {
-//        return makeRequest("WEBSOCKET", "/ws", user, AuthData.class, null);
-//    }
-//
-    public GameData makeMove(String username, String password, String email, GameData newGame) throws Exception {
-        UserData user = new UserData(username, password, email);
-        return makeRequest("WEBSOCKET", "/ws", newGame, GameData.class, null);
+    public WebSocketData update(WebSocketData data, String authToken) throws Exception {
+        return makeRequest("WEBSOCKET", "/ws", data, WebSocketData.class, authToken);
     }
-//
-//    public GameData resign(String gameName, String authToken) throws Exception {
-//        GameData game = new GameData(0, null, null, gameName, null, false);
-//        return makeRequest("POST", "/game", game, GameData.class, authToken);
-//    }
-//
-//    public ListGames leave(String authToken) throws Exception {
-//        return makeRequest("GET", "/game", null, ListGames.class, authToken);
-//    }
 
     public <T> T makeRequest(String requestMethod, String endpoint, Object request, Class<T> responseClass, String header) throws Exception{
         try{

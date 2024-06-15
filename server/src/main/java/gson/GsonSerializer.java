@@ -4,10 +4,7 @@ import chess.ChessGame;
 import com.google.gson.Gson;
 
 import dataaccess.ErrorMessage;
-import model.AuthData;
-import model.GameData;
-import model.JoinGameData;
-import model.UserData;
+import model.*;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
@@ -27,6 +24,7 @@ public class GsonSerializer {
     }
     public String errSerializer(ErrorMessage error) { return serializer.toJson(error);}
     public String messageSerializer(ServerMessage message) { return serializer.toJson(message);}
+    public String wsSerialixer(WebSocketData data) { return serializer.toJson(data);}
 
     public UserData userDeserializer(String user){
         return serializer.fromJson(user, UserData.class);
@@ -37,4 +35,5 @@ public class GsonSerializer {
     }
     public ChessGame chessGameDeserializer(String game) {return serializer.fromJson(game, ChessGame.class);}
     public UserGameCommand serverMessageDeserializer(String message) {return serializer.fromJson(message, UserGameCommand.class);}
+    public WebSocketData wsDeserializer(String message) {return serializer.fromJson(message, WebSocketData.class);}
 }
