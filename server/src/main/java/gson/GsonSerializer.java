@@ -24,7 +24,6 @@ public class GsonSerializer {
     }
     public String errSerializer(ErrorMessage error) { return serializer.toJson(error);}
     public String messageSerializer(ServerMessage message) { return serializer.toJson(message);}
-    public String commandSerializer(UserGameCommand data) { return serializer.toJson(data);}
 
     public UserData userDeserializer(String user){
         return serializer.fromJson(user, UserData.class);
