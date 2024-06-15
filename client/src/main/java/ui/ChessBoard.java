@@ -85,16 +85,20 @@ public class ChessBoard {
         }
     }
 
+    private static void printSide(PrintStream out, int row){
+        setHeader(out);
+        if(perspective == ChessGame.TeamColor.BLACK){
+            out.print(" " + (row + 1) + " ");
+        }
+        else{
+            out.print(" " + (8 - row) + " ");
+        }
+    }
+
     private static void drawRowOfSquares(PrintStream out, int row) {
 
         for (int squareRow = 0; squareRow < SQUARE_SIZE_IN_CHARS; ++squareRow) {
-            setHeader(out);
-            if(perspective == ChessGame.TeamColor.BLACK){
-                out.print(" " + (row + 1) + " ");
-            }
-            else{
-                out.print(" " + (8 - row) + " ");
-            }
+            printSide(out, row);
 
             for (int boardCol = 0; boardCol < BOARD_SIZE_IN_SQUARES; boardCol++) {
                 ChessPosition pos = switch (perspective){
@@ -120,8 +124,7 @@ public class ChessBoard {
                 printPlayer(out, board.getPiece(pos));
 
             }
-            setHeader(out);
-            out.print(" " + (row + 1) + " ");
+            printSide(out, row);
 
             setBlack(out);
             out.println();
