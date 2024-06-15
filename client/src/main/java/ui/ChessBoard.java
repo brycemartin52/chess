@@ -29,22 +29,21 @@ public class ChessBoard {
 
     public static void main(String[] args) {
         ChessGame game = new ChessGame();
-        printBoard(game, null);
+        printBoard(game, ChessGame.TeamColor.WHITE, null);
     }
 
-    public static String printBoard(ChessGame game, ArrayList <ChessPosition> highlightCoordinates){
+    public static String printBoard(ChessGame game, ChessGame.TeamColor perspective, ArrayList <ChessPosition> highlightCoordinates){
         var out = new PrintStream(System.out, true, StandardCharsets.UTF_8);
         board = game.getBoard();
         hiCoordinates = highlightCoordinates;
-        out.print(RESET);
-        out.print(ERASE_SCREEN);
-
-        if(game.getTeamTurn() == ChessGame.TeamColor.WHITE){
-            perspective = ChessGame.TeamColor.WHITE;
+        if(perspective == ChessGame.TeamColor.BLACK){
+            ChessBoard.perspective = ChessGame.TeamColor.BLACK;
         }
         else{
-            perspective = ChessGame.TeamColor.BLACK;
+            ChessBoard.perspective = ChessGame.TeamColor.WHITE;
         }
+        out.print(RESET);
+        out.println();
 
         drawHeaders(out);
         drawTicTacToeBoard(out);

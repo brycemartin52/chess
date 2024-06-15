@@ -54,7 +54,7 @@ public class ChessClient implements NotificationHandler{
                 else if(team != null){
                     return switch (cmd) {
                         case "help", "h" -> help();
-                        case "redraw", "r" -> ChessBoard.printBoard(currentGameData.game(), null);
+                        case "redraw", "r" -> ChessBoard.printBoard(currentGameData.game(), team, null);
                         case "leave", "l" -> leaveGame();
                         case "resign", "q" -> resign();
                         case "move", "m" -> makeMove(params);
@@ -65,7 +65,7 @@ public class ChessClient implements NotificationHandler{
                 else{
                     return switch (cmd) {
                         case "help", "h" -> help();
-                        case "redraw", "r" -> ChessBoard.printBoard(currentGameData.game(), null);
+                        case "redraw", "r" -> ChessBoard.printBoard(currentGameData.game(), team,null);
                         case "leave", "l" -> leaveGame();
                         case "highlight", "hi" -> highlight(params);
                         default -> "Unknown command\n";
@@ -260,7 +260,7 @@ public class ChessClient implements NotificationHandler{
             UserGameCommand data = new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, currentGameData.gameID(), attemptedMove);
             WebSocketFacade ws = new WebSocketFacade(this, serverUrl);
             ws.update(data);
-            return "Move made: check if the database is updated";
+            return "";
         }
         throw new ResponseException(400, "Expected: (M)ake <beginning position> <ending position>");
     }
@@ -288,7 +288,7 @@ public class ChessClient implements NotificationHandler{
                 throw new IllegalArgumentException(String.format("There is no piece on position %s", position));
             }
             ArrayList<ChessMove> allMoves = (ArrayList<ChessMove>) currentGameData.game().validMoves(position);
-            ChessBoard.printBoard(currentGameData.game(), getHighlightPos(allMoves));
+            ChessBoard.printBoard(currentGameData.game(), team, getHighlightPos(allMoves));
             return "Highlighted";
         }
         throw new ResponseException(400, "Expected: (H)ighlight <position>");
@@ -340,17 +340,12 @@ public class ChessClient implements NotificationHandler{
         else if(messageType == ServerMessage.ServerMessageType.LOAD_GAME){
             try{
                 currentGameData = getGame(currentGameData.gameID());
-                ChessBoard.printBoard(currentGameData.game(), null);
+                ChessBoard.printBoard(currentGameData.game(), team,null);
                 System.out.print("\n" + RESET + ">>> " + SET_TEXT_COLOR_GREEN);
             }
             catch(Exception e){
                 System.out.println("Unable to fetch the game for update");
             }
         }
-        //If there was a move made{
-        //Get the board
-        //print the new board
-        //print whatever the message was, including if there is checkmate
-        //}
     }
 }

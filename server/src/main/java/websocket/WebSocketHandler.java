@@ -68,24 +68,14 @@ public class WebSocketHandler {
                 var joinerNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, "IOException error", errorMessage);
                 send(session, gsonSerializer.messageSerializer(joinerNotification));
             }
-            catch(InvalidMoveException e){
-                String errorMessage = "InvalidMoveException error:" + e.getMessage();
-                var joinerNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null, errorMessage);
-                send(session, gsonSerializer.messageSerializer(joinerNotification));
-            }
-            catch (IllegalArgumentException e){
-                String errorMessage = "IllegalArgumentException error:" + e.getMessage();
+            catch(InvalidMoveException | IllegalArgumentException e){
+                String errorMessage = e.getMessage();
                 var joinerNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null, errorMessage);
                 send(session, gsonSerializer.messageSerializer(joinerNotification));
             }
         }
-        catch(DataAccessException e){
-            String errorMessage = "DataAccessException error:" + e.getMessage();
-            var joinerNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null, errorMessage);
-            send(session, gsonSerializer.messageSerializer(joinerNotification));
-        }
-        catch(NullPointerException e){
-            String errorMessage = "Nullptr error:" + e.getMessage();
+        catch(DataAccessException | NullPointerException e){
+            String errorMessage = e.getMessage();
             var joinerNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, null, errorMessage);
             send(session, gsonSerializer.messageSerializer(joinerNotification));
         }
@@ -144,17 +134,17 @@ public class WebSocketHandler {
         if (game.finished() || game.game().isInCheckmate(ChessGame.TeamColor.WHITE) || game.game().isInCheckmate(ChessGame.TeamColor.BLACK) ||
                 game.game().isInStalemate(ChessGame.TeamColor.WHITE) || game.game().isInStalemate(ChessGame.TeamColor.BLACK)
         ){
-            throw new IllegalArgumentException("Game's over folks!");
+            throw new IllegalArgumentException("Game's over folks!\n");
         }
         if(game.game().getBoard().getPiece(fromPos).getTeamColor() != team){
-            throw new IllegalArgumentException("That's not your team! Nice try though.");
+            throw new IllegalArgumentException("That's not your team! Nice try though.\n");
         }
         if(game.game().getTeamTurn() != team){
-            throw new IllegalArgumentException("That's not your turn! Nice try though.");
+            throw new IllegalArgumentException("That's not your turn! Nice try though.\n");
         }
 
         if(!game.game().validMoves(fromPos).contains(move)){
-            throw new IllegalArgumentException(String.format("Invalid move: '%s' to '%s'", fromPos, toPos));
+            throw new IllegalArgumentException(String.format("Invalid move: '%s' to '%s%n'", fromPos, toPos));
         }
         game.game().makeMove(move);
         gdao.updateGame(game);
@@ -186,10 +176,10 @@ public class WebSocketHandler {
 
     private void resign(String username, int gameID) throws IOException, DataAccessException {
         if(team == null){
-            throw new IllegalArgumentException("You're an observer silly, you don't resign.");
+            throw new IllegalArgumentException("You're an observer silly, you don't resign.\n");
         }
         if(game.finished()){
-            throw new IllegalArgumentException("Game's already finished ya goon.");
+            throw new IllegalArgumentException("Game's already finished ya goon.\n");
         }
 
         GameData updatedGame = new GameData(game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName(), game.game(), true);
