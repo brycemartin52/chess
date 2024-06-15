@@ -282,23 +282,16 @@ public class ChessClient implements NotificationHandler{
         throw new ResponseException(400, "Expected: (H)ighlight <position>");
     }
 
-    private void updateGame(GameData newGame){
-
-    }
-
     public String leaveGame() throws Exception {
         team = null;
         inGame = false;
         UserGameCommand data = new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, currentGameData.gameID(), null);
         WebSocketFacade ws = new WebSocketFacade(this, serverUrl);
         ws.update(data, authToken);
-        // Update the game in the DataBase
-        //Notify the other player of the leaving
         return "Game left";
     }
 
     public String resign() throws Exception {
-        //update game in the database
         UserGameCommand data = new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, currentGameData.gameID(), null);
         WebSocketFacade ws = new WebSocketFacade(this, serverUrl);
         ws.update(data, authToken);
