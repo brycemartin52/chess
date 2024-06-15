@@ -33,7 +33,6 @@ public class Server {
         gService = new GameService();
         uService = new UserService();
         aService = new AuthService();
-//        wService = new WebSocketHandler();
         }
         catch(Exception e){
         System.out.println("The Server failed to start up");
@@ -47,6 +46,8 @@ public class Server {
         Spark.staticFiles.location("web");
 
         // Register your endpoints and handle exceptions here.
+        Spark.webSocket("/ws", new WebSocketHandler());
+
         Spark.delete("/db", this::clearHandler);
         Spark.post("/user", this::registerHandler);
         Spark.post("/session", this::loginHandler);
@@ -54,7 +55,6 @@ public class Server {
         Spark.get("/game", this::listGameHandler);
         Spark.post("/game", this::createGameHandler);
         Spark.put("/game", this::joinGameHandler);
-        Spark.webSocket("/ws", new WebSocketHandler(gService));
 
         Spark.awaitInitialization();
         return Spark.port();

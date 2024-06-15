@@ -4,7 +4,9 @@ import chess.ChessGame;
 import com.google.gson.Gson;
 import exception.ResponseException;
 import model.*;
+import websocket.commands.UserGameCommand;
 
+import javax.websocket.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -13,7 +15,8 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
 
-public class WebSocketFacade {
+
+public class WebSocketFacade extends Endpoint{
     private final String serverUrl;
     private NotificationHandler handler;
 
@@ -23,8 +26,8 @@ public class WebSocketFacade {
         this.handler = handler;
     }
 
-    public WebSocketData update(WebSocketData data, String authToken) throws Exception {
-        return makeRequest("WEBSOCKET", "/ws", data, WebSocketData.class, authToken);
+    public UserGameCommand update(UserGameCommand data, String authToken) throws Exception {
+        return makeRequest("WEBSOCKET", "/ws", data, UserGameCommand.class, authToken);
     }
 
     public <T> T makeRequest(String requestMethod, String endpoint, Object request, Class<T> responseClass, String header) throws Exception{
@@ -82,5 +85,10 @@ public class WebSocketFacade {
 
     private boolean isSuccessful(int status) {
         return status / 100 == 2;
+    }
+
+    @Override
+    public void onOpen(Session session, EndpointConfig endpointConfig) {
+
     }
 }

@@ -24,7 +24,7 @@ public class GsonSerializer {
     }
     public String errSerializer(ErrorMessage error) { return serializer.toJson(error);}
     public String messageSerializer(ServerMessage message) { return serializer.toJson(message);}
-    public String wsSerialixer(WebSocketData data) { return serializer.toJson(data);}
+    public String commandSerializer(UserGameCommand data) { return serializer.toJson(data);}
 
     public UserData userDeserializer(String user){
         return serializer.fromJson(user, UserData.class);
@@ -34,6 +34,5 @@ public class GsonSerializer {
         return serializer.fromJson(game, GameData.class);
     }
     public ChessGame chessGameDeserializer(String game) {return serializer.fromJson(game, ChessGame.class);}
-    public UserGameCommand serverMessageDeserializer(String message) {return serializer.fromJson(message, UserGameCommand.class);}
-    public WebSocketData wsDeserializer(String message) {return serializer.fromJson(message, WebSocketData.class);}
+    public UserGameCommand commandDeserializer(String message) {return serializer.fromJson(message, UserGameCommand.class);}
 }

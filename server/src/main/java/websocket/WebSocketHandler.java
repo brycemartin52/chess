@@ -3,61 +3,83 @@ package websocket;
 import chess.ChessGame;
 import chess.ChessMove;
 import dataaccess.DataAccessException;
+import dataaccess.SQLAuthDAO;
+import dataaccess.SQLGameDAO;
+import dataaccess.SQLUserDAO;
 import gson.GsonSerializer;
 import model.GameData;
-import model.WebSocketData;
-import org.eclipse.jetty.server.Request;
-import org.eclipse.jetty.server.Response;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
+import service.AuthService;
 import service.GameService;
+import service.UserService;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
+
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.Objects;
 
 
-//need to extend Endpoint for websocket to work properly
 @WebSocket
-public class WebSocketHandler{
+public class WebSocketHandler {
     private WebSocketSessions sessions;
     private final GsonSerializer gsonSerializer;
-    private GameService gameService;
+    private SQLAuthDAO adao;
+    private SQLGameDAO gdao;
+    private SQLUserDAO udao;
 
-    public WebSocketHandler(GameService gService){
+    String authToken;
+    String username;
+    GameData game;
+    ChessGame.TeamColor team;
+
+    public WebSocketHandler(){
         sessions = new WebSocketSessions();
         gsonSerializer = new GsonSerializer();
-        gameService = gService;
+        try{
+            adao = new SQLAuthDAO();
+            gdao = new SQLGameDAO();
+            udao = new SQLUserDAO();
+        }
+        catch(DataAccessException e){
+            System.out.println("Unable to initialize wsHandler DAOs");
+        }
     }
 
     @OnWebSocketMessage
-    public void onMessage(Request request, Response response) throws IOException {
-        WebSocketData body = gsonSerializer.wsDeserializer(request.body());
-
-        String authToken = request.getHeader("authorization");
-        String username = body.username();
-        Session session = (Session) request.getSession();
-        GameData game = body.game();
-        ChessGame.TeamColor team = body.team();
-        ChessMove move = body.move();
-        UserGameCommand.CommandType gameCommand = body.message();
+    public void onMessage(Session session, String ugc) throws IOException {
+        UserGameCommand body = gsonSerializer.commandDeserializer(ugc);
         try{
-            switch (gameCommand) {
-                case CONNECT -> connect(authToken, session, game.gameID(), team);
-                case MAKE_MOVE -> makeMove(username, authToken, session, game, move);
+            authToken = body.getAuthString();
+            username = adao.getAuth(authToken).username();
+            game = gdao.getGame(body.getGameID());
+            if (Objects.equals(username, game.whiteUsername())) {team = ChessGame.TeamColor.WHITE;}
+            else if (Objects.equals(username, game.blackUsername())) {team = ChessGame.TeamColor.BLACK;}
+            else {team = null;}
+        }
+        catch(DataAccessException e){
+            System.out.println("There was a problem initializing the onMessage\n"+e.getMessage());
+        }
+
+        try{
+            switch (body.getCommandType()) {
+                case CONNECT -> connect(username, session, game.gameID(), team);
+                case MAKE_MOVE -> makeMove(username, session, game, body.getMove());
                 case LEAVE -> leave(username, session, game.gameID());
                 case RESIGN -> resign(username, session, game.gameID());
             }
         }
         catch(IOException e){
-            var errorMessage = String.format("Calling 'onMessage' with the message '%s' gave the following error: %n%s", body.message(), e.getMessage());
+            var errorMessage = String.format("Calling 'onMessage' with the message gave the following error: %n%s", e.getMessage());
             var joinerNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, errorMessage);
             send(session, gsonSerializer.messageSerializer(joinerNotification));
         }
         catch(DataAccessException e){
-            var errorMessage = "Unauthorized to move";
+            String errorMessage = e.getMessage();
+
             var joinerNotification = new ServerMessage(ServerMessage.ServerMessageType.ERROR, errorMessage);
             send(session, gsonSerializer.messageSerializer(joinerNotification));
         }
@@ -76,7 +98,6 @@ public class WebSocketHandler{
                 send(session, gsonSerializer.messageSerializer(notification));
             }
             else{toRemove.add(session);}
-
         }
 
         for (var session : toRemove){
@@ -103,8 +124,8 @@ public class WebSocketHandler{
         send(session, gsonSerializer.messageSerializer(joinerNotification));
     }
 
-    private void makeMove(String username, String authString, Session session, GameData game, ChessMove move) throws IOException, DataAccessException {
-        gameService.updateGame(authString, game);
+    private void makeMove(String username, Session session, GameData game, ChessMove move) throws IOException, DataAccessException {
+        gdao.updateGame(game);
 
         var message = String.format("%s moved from %s to %s", username, move.getStartPosition(), move.getEndPosition());
         var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);
@@ -112,6 +133,7 @@ public class WebSocketHandler{
     }
 
     private void leave(String username, Session session, int gameID) throws IOException {
+        //Update the game here
         sessions.removeSessionFromGame(gameID, session);
         var message = String.format("%s left the game", username);
         var notification = new ServerMessage(ServerMessage.ServerMessageType.NOTIFICATION, message);

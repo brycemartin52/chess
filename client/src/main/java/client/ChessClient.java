@@ -10,8 +10,8 @@ import exception.ResponseException;
 import model.AuthData;
 import model.GameData;
 import model.ListGames;
-import model.WebSocketData;
 import ui.ChessBoard;
+import ui.EscapeSequences;
 import websocket.commands.UserGameCommand;
 import websocket.messages.ServerMessage;
 
@@ -183,8 +183,6 @@ public class ChessClient implements NotificationHandler{
                 case "BLACK", "B", "b" -> ChessGame.TeamColor.BLACK;
                 default -> throw new ResponseException(403, "Unexpected value: " + color);
             };
-//            ws = new WebSocketFacade(serverUrl, notificationHandler);
-//            ws.enterPetShop(username);
             this.team = team;
             server.playGame(team, gameID, authToken);
             HashSet<GameData> games = getGames();
@@ -196,17 +194,19 @@ public class ChessClient implements NotificationHandler{
                 }
             }
             inGame = true;
+            UserGameCommand data = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, currentGameData.gameID(), null);
+            ws.update(data, authToken);
             return "Joined Game";
         }
         throw new ResponseException(400, "Expected: (P)lay <(W)HITE or (B)LACK> <gameID>");
     }
 
-    public String watchGame(Object... params) throws ResponseException {
+    public String watchGame(Object... params) throws Exception {
         assertSignedIn();
         if (params.length >= 1) {
             int gameID = Integer.parseInt((String) params[0]);
-//            ws = new WebSocketFacade(serverUrl, notificationHandler);
-//            ws.enterPetShop(username);
+            UserGameCommand data = new UserGameCommand(UserGameCommand.CommandType.CONNECT, authToken, currentGameData.gameID(), null);
+            ws.update(data, authToken);
             ChessBoard.main(new String[0]);
             inGame = true;
             return "Joined Game";
@@ -262,8 +262,7 @@ public class ChessClient implements NotificationHandler{
             if (currentGameData.game().isInCheckmate(ChessGame.TeamColor.WHITE) || currentGameData.game().isInCheckmate(ChessGame.TeamColor.BLACK) ||
                 currentGameData.game().isInStalemate(ChessGame.TeamColor.WHITE) || currentGameData.game().isInStalemate(ChessGame.TeamColor.BLACK)){
                 GameData game = currentGameData;
-                GameData updatedGame = new GameData(game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName(), game.game(), true);
-                WebSocketData data = new WebSocketData(UserGameCommand.CommandType.MAKE_MOVE, username, updatedGame, attemptedMove, team);
+                UserGameCommand data = new UserGameCommand(UserGameCommand.CommandType.MAKE_MOVE, authToken, currentGameData.gameID(), attemptedMove);
                 ws.update(data, authToken);
             }
             return "Move made: check if the database is updated";
@@ -315,7 +314,7 @@ public class ChessClient implements NotificationHandler{
         }
         team = null;
         inGame = false;
-        WebSocketData data = new WebSocketData(UserGameCommand.CommandType.LEAVE, username, updatedGame, null, team);
+        UserGameCommand data = new UserGameCommand(UserGameCommand.CommandType.LEAVE, authToken, currentGameData.gameID(), null);
         ws.update(data, authToken);
         // Update the game in the DataBase
         //Notify the other player of the leaving
@@ -327,7 +326,7 @@ public class ChessClient implements NotificationHandler{
         GameData updatedGame = new GameData(game.gameID(), game.whiteUsername(), game.blackUsername(), game.gameName(), game.game(), true);
 
         //update game in the database
-        WebSocketData data = new WebSocketData(UserGameCommand.CommandType.RESIGN, username, updatedGame, null, team);
+        UserGameCommand data = new UserGameCommand(UserGameCommand.CommandType.RESIGN, authToken, currentGameData.gameID(), null);
         ws.update(data, authToken);
 
         return "Resigned. Better luck next time!";
@@ -355,8 +354,19 @@ public class ChessClient implements NotificationHandler{
 
     @Override
     public void notify(ServerMessage notification) {
-        notification.getServerMessageType();
-
+        ServerMessage.ServerMessageType messageType = notification.getServerMessageType();
+        if(messageType == ServerMessage.ServerMessageType.ERROR){
+            System.out.println(EscapeSequences.SET_TEXT_COLOR_RED + notification.getMessage());
+        }
+        else if(messageType == ServerMessage.ServerMessageType.LOAD_GAME){
+            try{
+                currentGameData = getGame(currentGameData.gameID());
+                ChessBoard.printBoard(currentGameData.game(), null);
+            }
+            catch(Exception e){
+                System.out.println("Unable to fetch the game for update");
+            }
+        }
         //If there was a move made{
         //Get the board
         //print the new board
